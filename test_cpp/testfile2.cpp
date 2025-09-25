@@ -1,0 +1,26 @@
+#include<stdio.h>
+const int a[3] = {10, 20, 30};
+int aa[4] = {1, 2, 3, 4};
+int aaa[5];
+int main(){
+	printf("22241014\n");
+	printf("a[0]=%d\n", a[0]);
+	printf("a[1]=%d\n", a[1]);
+	printf("a[2]=%d\n", a[2]);
+	
+	printf("aa[3]=%d\n", aa[3]);
+	
+	aaa[0] = 100;
+	aaa[1] = aa[1] + a[1];
+	aaa[4] = 500;
+	
+	printf("aaa[0]=%d\n", aaa[0]);
+	printf("aaa[1]=%d\n", aaa[1]);
+	
+	int idx = 4;
+	printf("aaa[%d] = %d\n",idx, aaa[idx]);
+	aa[0] = aaa[0];
+	printf("new aa[0]=%d\n",aa[0]);
+	printf("B-test1 ended\n");
+	return 0;
+}
