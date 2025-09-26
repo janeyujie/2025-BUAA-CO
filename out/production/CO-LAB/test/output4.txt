@@ -1,0 +1,10 @@
+22241014
+a = 1
+int b = 6
+v2 = 200
+b = 6
+a = 100
+a = 1
+I'm a void sentence
+c1 = 10
+I'm a void sentence

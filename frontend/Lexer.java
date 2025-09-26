@@ -1,32 +1,11 @@
 package frontend;
 
-enum TokenType {
-    BEGINSY, ENDSY, FORSY, DOSY, IFSY, THENSY, ELSESY,
-    IDSY, // 内部字符串(标识符
-    INTSY, // 整数
-    COLONSY, // :
-    PLUSSY, // +
-    STARSY, // *
-    COMSY, //,
-    LPARSY, // (
-    RPARSY, // )
-    ASSIGNSY, // :=
-    EOFSY,
-    ERRORSY
-}
-
-class Token {
-    TokenType type;
-    String value;
-    int num;
-}
-
 public class Lexer {
-    String sourceCode;
-    int currentPos;
+    private final String sourceCode;
+    private int currentPos = 0;
+    private int line = 1;
     public Lexer(String code) {
         this.sourceCode = code;
-        this.currentPos = 0;
     }
 
     public boolean hasNext() {
@@ -34,115 +13,200 @@ public class Lexer {
     }
 
     public Token getNextToken() {
-        Token token = new Token();
-
-        if (!hasNext()) {
-            token.type = TokenType.EOFSY;
-            token.value = "EOF";
-            return token;
-        }
         // 跳过空白
-        while(sourceCode.charAt(this.currentPos) == ' ') {
-            currentPos++;
+        skipWhitespace();
+        // 读到文件最后输出EOF
+        //System.out.println(currentPos);
+        if (!hasNext()) {
+            return new Token(TokenType.EOFSY, TokenType.EOFSY.toString(), line);
         }
-        if (Character.isLetter(sourceCode.charAt(currentPos))) {
-            StringBuilder sb = new StringBuilder();
-            while ((Character.isDigit(sourceCode.charAt(currentPos)) || Character.isLetter(sourceCode.charAt(currentPos)) && hasNext())) {
-                sb.append(sourceCode.charAt(currentPos));
+        char currentChar = sourceCode.charAt(currentPos);
+        //System.out.println(currentChar);
+        if (Character.isLetter(currentChar) || currentChar == '_') {
+            int start = currentPos;
+            while (hasNext() && (Character.isDigit(sourceCode.charAt(currentPos)) || Character.isLetter(sourceCode.charAt(currentPos)) || sourceCode.charAt(currentPos) == '_')) {
+                currentPos++;
+            }
+            String lexeme = sourceCode.substring(start, currentPos);
+
+            if (lexeme.equals(TokenType.CONSTTK.toString())) {
+                return new Token(TokenType.CONSTTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.INTTK.toString())) {
+                return new Token(TokenType.INTTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.STATICTK.toString())) {
+                return new Token(TokenType.STATICTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.BREAKTK.toString())) {
+                return new Token(TokenType.BREAKTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.CONTINUETK.toString())) {
+                return new Token(TokenType.CONTINUETK, lexeme, line);
+            } else if (lexeme.equals(TokenType.IFTK.toString())) {
+                return new Token(TokenType.IFTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.MAINTK.toString())) {
+                return new Token(TokenType.MAINTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.ELSETK.toString())) {
+                return new Token(TokenType.ELSETK, lexeme, line);
+            } else if (lexeme.equals(TokenType.FORTK.toString())) {
+                return new Token(TokenType.FORTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.RETURNTK.toString())) {
+                return new Token(TokenType.RETURNTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.VOIDTK.toString())) {
+                return new Token(TokenType.VOIDTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.PRINTFTK.toString())){
+                return new Token(TokenType.PRINTFTK, lexeme, line);
+            } else {
+                return new Token(TokenType.IDENFR, lexeme, line);
+                //token.setType(TokenType.IDNET);
+            }
+
+        } else if (Character.isDigit(currentChar)) {
+            int start = currentPos;
+            while (hasNext() && Character.isDigit(sourceCode.charAt(currentPos))) {
                 currentPos++;
             }
             //currentPos--;
-            token.value = sb.toString();
-            if (token.value.equals("BEGIN")) {
-                token.type = TokenType.BEGINSY;
-            } else if (token.value.equals("END")) {
-                token.type = TokenType.ENDSY;
-            } else if (token.value.equals("FOR")) {
-                token.type = TokenType.FORSY;
-            } else if (token.value.equals("DO")) {
-                token.type = TokenType.DOSY;
-            } else if (token.value.equals("IF")) {
-                token.type = TokenType.IFSY;
-            } else if (token.value.equals("THEN")) {
-                token.type = TokenType.THENSY;
-            } else if (token.value.equals("ELSE")) {
-                token.type = TokenType.ELSESY;
-            } else {
-                token.type = TokenType.IDSY;
-            }
+            String lexeme = sourceCode.substring(start, currentPos);
+            return new Token(TokenType.INTCON, lexeme, line);
 
-        } else if (sourceCode.charAt(currentPos) >= '0' && sourceCode.charAt(currentPos) <= '9' && hasNext()) {
-            StringBuilder sb = new StringBuilder();
-            while (Character.isDigit(sourceCode.charAt(currentPos))) {
-                sb.append(sourceCode.charAt(currentPos));
+        } else if (currentChar == '+') {
+            currentPos++;
+            return new Token(TokenType.PLUS, String.valueOf(currentChar), line);
+
+        } else if (currentChar == '-') {
+            currentPos++;
+            return new Token(TokenType.MINU, String.valueOf(currentChar), line);
+        } else if (currentChar == '*') {
+            currentPos++;
+            return new Token(TokenType.MULT, String.valueOf(currentChar), line);
+        } else if (currentChar == '%') {
+            currentPos++;
+            return new Token(TokenType.MOD, String.valueOf(currentChar), line);
+        } else if (currentChar == ';') {
+            currentPos++;
+            return new Token(TokenType.SEMICN, String.valueOf(currentChar), line);
+        } else if (currentChar == ',') {
+            currentPos++;
+            return new Token(TokenType.COMMA, String.valueOf(currentChar), line);
+        } else if (currentChar == '(') {
+            currentPos++;
+            return new Token(TokenType.LPARENT, String.valueOf(currentChar), line);
+        } else if (currentChar == ')') {
+            currentPos++;
+            return new Token(TokenType.RPARENT, String.valueOf(currentChar), line);
+        } else if (currentChar == '{') {
+            currentPos++;
+            return new Token(TokenType.LBRACE, String.valueOf(currentChar), line);
+        } else if (currentChar == '}') {
+            currentPos++;
+            return new Token(TokenType.RBRACE, String.valueOf(currentChar), line);
+        } else if (currentChar == '[') {
+            currentPos++;
+            return new Token(TokenType.LBRACK, String.valueOf(currentChar), line);
+        } else if (currentChar == ']') {
+            currentPos++;
+            return new Token(TokenType.RBRACK, String.valueOf(currentChar), line);
+        } else if (currentChar == '!') {
+            currentPos++;
+            if (sourceCode.charAt(currentPos) == '=') {
+                currentPos++;
+                return new Token(TokenType.NEQ, sourceCode.substring(currentPos-2, currentPos), line);
+            } else {
+                return new Token(TokenType.NOT, String.valueOf(currentChar), line);
+            }
+        } else if (currentChar == '=') {
+            currentPos++;
+            if (sourceCode.charAt(currentPos) == '=') {
+                currentPos++;
+                return new Token(TokenType.EQL, sourceCode.substring(currentPos-2, currentPos), line);
+            } else {
+                return new Token(TokenType.ASSIGN, String.valueOf(currentChar), line);
+            }
+        } else if (currentChar == '<') {
+            currentPos++;
+            if (sourceCode.charAt(currentPos) == '=') {
+                currentPos++;
+                return new Token(TokenType.LEQ, sourceCode.substring(currentPos-2, currentPos), line);
+            } else {
+                return new Token(TokenType.LSS, String.valueOf(currentChar), line);
+            }
+        } else if (currentChar == '>') {
+            currentPos++;
+            if (sourceCode.charAt(currentPos) == '=') {
+                currentPos++;
+                return new Token(TokenType.GEQ, sourceCode.substring(currentPos-2, currentPos), line);
+            } else {
+                return new Token(TokenType.GRE, String.valueOf(currentChar), line);
+            }
+        } else if (currentChar == '&') {
+            currentPos++;
+            if (sourceCode.charAt(currentPos) == '&') {
+                currentPos++;
+                return new Token(TokenType.AND, sourceCode.substring(currentPos-2, currentPos), line);
+            } else {
+                // TODO: 错误处理
+                return new Token(TokenType.ERRORSY, "a", line);
+            }
+        } else if (currentChar == '|') {
+            currentPos++;
+            if (sourceCode.charAt(currentPos) == '|') {
+                currentPos++;
+                return new Token(TokenType.OR, sourceCode.substring(currentPos-2, currentPos), line);
+            } else {
+                // TODO: 错误处理
+                return new Token(TokenType.ERRORSY, "a", line);
+            }
+        } else if (currentChar == '/') {
+            // 三种情况，DIV，行级注释和块级注释
+            currentPos++;
+            if (sourceCode.charAt(currentPos) == '/') {
+                while (hasNext() && sourceCode.charAt(currentPos) != '\n') {
+                    currentPos++;
+                    //System.out.println(currentPos);
+                }
+                return new Token(TokenType.ANNOSY, "", line);
+            } else if (sourceCode.charAt(currentPos) == '*') {
+                while (hasNext()) {
+                    currentPos++;
+                    if (sourceCode.charAt(currentPos) == '*') {
+                        currentPos++;
+                        if (hasNext() && sourceCode.charAt(currentPos) == '/')
+                        {
+                            currentPos++;
+                            break;
+                        }
+                    }
+                }
+                return new Token(TokenType.ANNOSY, "", line);
+            } else {
+                return new Token(TokenType.DIV, String.valueOf(currentChar), line);
+            }
+        } else if (currentChar == '"') {
+            // 只有可能是字符串常量
+            int start = currentPos;
+            currentPos++;
+            while (hasNext() && sourceCode.charAt(currentPos) != '"') {
+                //System.out.println(sourceCode.charAt(currentPos));
                 currentPos++;
             }
-            //currentPos--;
-            token.type = TokenType.INTSY;
-            token.value = sb.toString();
-            token.num = Integer.parseInt(sb.toString());
-
-        } else if (sourceCode.charAt(currentPos) == '+') {
-            token.type = TokenType.PLUSSY;
-            token.value = String.valueOf(sourceCode.charAt(currentPos));
             currentPos++;
-
-        } else if (sourceCode.charAt(currentPos) == '*') {
-            token.type = TokenType.STARSY;
-            token.value = String.valueOf(sourceCode.charAt(currentPos));
-            currentPos++;
-
-        } else if (sourceCode.charAt(currentPos) == ',') {
-            token.type = TokenType.COMSY;
-            token.value = String.valueOf(sourceCode.charAt(currentPos));
-            currentPos++;
-
-        } else if (sourceCode.charAt(currentPos) == '(') {
-            token.type = TokenType.LPARSY;
-            token.value = String.valueOf(sourceCode.charAt(currentPos));
-            currentPos++;
-
-        } else if (sourceCode.charAt(currentPos) == ')') {
-            token.type = TokenType.RPARSY;
-            token.value = String.valueOf(sourceCode.charAt(currentPos));
-            currentPos++;
-
-        } else if (sourceCode.charAt(currentPos) == ':') {
-            if (sourceCode.charAt(currentPos + 1) == '=') {
-                token.type = TokenType.ASSIGNSY;
-                token.value = sourceCode.substring(currentPos, currentPos + 2);
-                currentPos+=2;
-            } else {
-                token.type = TokenType.COLONSY;
-                token.value = String.valueOf(sourceCode.charAt(currentPos));
-                currentPos++;
-            }
-
-        } else {
-            token.type = TokenType.ERRORSY;
-            token.value = String.valueOf(sourceCode.charAt(currentPos));
-            currentPos++;
+            // 字符串常量中应该包含引号吧
+            String lexeme = sourceCode.substring(start, currentPos);
+            return new Token(TokenType.STRCON, lexeme, line);
         }
-
-        //System.out.println(currentPos);ni
-        return token;
+        return null;
     }
 
-    public static void main(String[] args) {
-        String s = "FOR i := 10 DO BEGIN count (:= count * 1) END;";
-        Lexer lexer = new Lexer(s);
-        System.out.printf("Source Code: %s\n\n", s);
-        System.out.printf("%-10s | %-10s | %s\n", "Type", "Value", "Integer Value");
-        System.out.printf("-----------------------------------------\n");
-
-        Token token = lexer.getNextToken();
-        while (token.type != TokenType.EOFSY) {
-            if (token.type == TokenType.INTSY) {
-                System.out.printf("%-10s | %-10s | %d\n", token.type, token.value, token.num);
+    // TODO: 一个跳过空白的函数（换行需要单独识别，用来增加行号
+    private void skipWhitespace() {
+        while (currentPos < sourceCode.length()) {
+            char ch = sourceCode.charAt(currentPos);
+            if (ch == ' ' || ch == '\t' || ch == '\r') {
+                currentPos++;
+            } else if (ch == '\n') {
+                currentPos++;
+                line++;
             } else {
-                System.out.printf("%-10s | %-10s |\n", token.type, token.value);
+                break;
             }
-            token = lexer.getNextToken();
         }
     }
 }

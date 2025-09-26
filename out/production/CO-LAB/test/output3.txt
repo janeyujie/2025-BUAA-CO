@@ -1,0 +1,11 @@
+22241014
+a[0] = 1
+arr[0] = 1
+new arr[0] = 999
+after func a[0] = 999
+static counter = 1
+static counter = 2
+static counter = 3
+a[4] = 5
+ !()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~
+B-test2 ended

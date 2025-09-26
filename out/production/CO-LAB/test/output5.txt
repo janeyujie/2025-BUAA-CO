@@ -1,0 +1,10 @@
+22241014
+input param 5
+int_func(5) is 25
+res is 25
+continue at 2
+break at 5
+sum = 8
+i = 20
+i = 20
+C-test2 ended

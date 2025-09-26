@@ -1,0 +1,10 @@
+22241014
+culculate add and mul
+add_and_mul res = 1023456783
+mod_res = 0
+division res = 341152263
+loooooop
+loooooopppppp
+mod <= div
+lllllloop
+C-test3 ended

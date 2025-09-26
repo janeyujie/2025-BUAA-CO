@@ -1,0 +1,10 @@
+22241014
+now var = 0
+after && var = 0
+now var = 0
+after || var = 0
+now var = 0
+calling func check
+after && var = 1
+calling func check
+after || var = 2
