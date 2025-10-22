@@ -1,11 +1,46 @@
 package frontend;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Lexer {
     private final String sourceCode;
+    private String outputString = "";
+    private final List<SyntaxError> errors = new ArrayList<>();
+    private final List<Token> tokens = new ArrayList<>();
+
     private int currentPos = 0;
     private int line = 1;
     public Lexer(String code) {
         this.sourceCode = code;
+    }
+
+    public List<Token> getTokens() {
+        Token token;
+        do {
+            token = getNextToken();
+            if (token.getType() == TokenType.EOFSY) {
+                outputString += token.toString();
+                break;
+            } else if (token.getType() == TokenType.ANNOSY) {
+                continue;
+            } else if (token.getType() == TokenType.ERRORSY) {
+                //lexicalError += token.toError();
+                errors.add(new SyntaxError(token.getLineno(), token.getContent()));
+                continue;
+            }
+            tokens.add(token);
+            outputString += token.toString();
+        } while (true);
+        return tokens;
+    }
+
+    public String getOutputString() {
+        return outputString;
+    }
+
+    public List<SyntaxError> getErrors() {
+        return errors;
     }
 
     public boolean hasNext() {
@@ -143,7 +178,8 @@ public class Lexer {
                 return new Token(TokenType.AND, sourceCode.substring(currentPos-2, currentPos), line);
             } else {
                 // TODO: 错误处理
-                return new Token(TokenType.ERRORSY, "a", line);
+                errors.add(new SyntaxError(line, "a"));
+                return new Token(TokenType.AND, "&", line);
             }
         } else if (currentChar == '|') {
             currentPos++;
@@ -152,7 +188,8 @@ public class Lexer {
                 return new Token(TokenType.OR, sourceCode.substring(currentPos-2, currentPos), line);
             } else {
                 // TODO: 错误处理
-                return new Token(TokenType.ERRORSY, "a", line);
+                errors.add(new SyntaxError(line, "a"));
+                return new Token(TokenType.OR, "|", line);
             }
         } else if (currentChar == '/') {
             // 三种情况，DIV，行级注释和块级注释

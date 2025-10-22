@@ -1,7 +1,6 @@
-/* iiiiiii*/
-int i;
-int ii = 0;
+c
+int main(){
 
-i} i/m
+    c[1 =1
 
-1 && 2 | 3
+}

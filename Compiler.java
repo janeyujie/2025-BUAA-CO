@@ -1,42 +1,50 @@
-import frontend.Lexer;
-import frontend.Token;
-import frontend.TokenType;
+import ast.Node;
+import frontend.*;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Compiler {
 
     private final String sourceCode;
-    private Lexer lexer;
-    private String lexerString = "";
-    private String error = "";
+    List<SyntaxError> errors = new ArrayList<>();
 
     public Compiler(String sourceCode) {
         this.sourceCode = sourceCode;
-        this.lexer = new Lexer(sourceCode);
     }
 
-    public void compile() {
-        Token token;
+    public void compile() throws IOException {
         // 词法分析
-        do {
-            token = lexer.getNextToken();
-            //System.out.println(token);
-            if (token.getType() == TokenType.EOFSY) {
-                break;
-            } else if (token.getType() == TokenType.ANNOSY) {
-                continue;
-            } else if (token.getType() == TokenType.ERRORSY) {
-                error += token.toError();
-                continue;
-            }
+        Lexer lexer = new Lexer(sourceCode);
+        List<Token> tokens = lexer.getTokens();
+        errors.addAll(lexer.getErrors());
+        System.out.println(lexer.getOutputString());
 
-            lexerString += token.toString();
-        } while (true);
+        // 语法分析
+        Parser parser = new Parser(tokens);
+        Node tree = parser.parse(); // 启动语法分析，得到一个AST
+        errors.addAll(parser.getErrors());
+
+        // 输出
+        if (!errors.isEmpty()) {
+            writeErrors(errors);
+        } else {
+            String parserOutput = parser.getOutput();
+            Files.write(Paths.get("parser.txt"), parserOutput.getBytes());
+        }
+    }
+
+    private void writeErrors(List<SyntaxError> errors) throws IOException {
+        Collections.sort(errors); //按行号排序
+        StringBuilder errorOutput = new StringBuilder();
+        for (SyntaxError error : errors) {
+            errorOutput.append(error.toString()).append("\n");
+        }
+        Files.write(Paths.get("error.txt"), errorOutput.toString().getBytes());
     }
 
     public static void main(String[] args) {
@@ -49,11 +57,11 @@ public class Compiler {
             Compiler compiler = new Compiler(sourceCode);
             compiler.compile();
 
-            if (!compiler.error.isEmpty()) {
-                Files.write(Paths.get(errorPath), compiler.error.getBytes());
+            /*if (!compiler.lexicalError.isEmpty()) {
+                Files.write(Paths.get(errorPath), compiler.lexicalError.getBytes());
             } else {
                 Files.write(Paths.get(outputPath), compiler.lexerString.getBytes());
-            }
+            }*/
             //System.out.print(compiler.output);
         } catch (IOException e) {
             System.err.println("Error reading or writing file: " + e.getMessage());
