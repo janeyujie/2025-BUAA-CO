@@ -65,8 +65,10 @@ public class Compiler {
             //System.out.print(compiler.output);
         } catch (IOException e) {
             System.err.println("Error reading or writing file: " + e.getMessage());
+            e.printStackTrace();
         } catch (RuntimeException e) {
-            System.err.println("Compilation Error: " + e.getMessage());
+            //System.err.println("Compilation Error: " + e.getMessage());
+            e.printStackTrace();
         }
 
     }

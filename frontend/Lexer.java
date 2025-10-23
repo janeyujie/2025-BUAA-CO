@@ -20,6 +20,7 @@ public class Lexer {
         do {
             token = getNextToken();
             if (token.getType() == TokenType.EOFSY) {
+                tokens.add(token);
                 outputString += token.toString();
                 break;
             } else if (token.getType() == TokenType.ANNOSY) {
@@ -203,13 +204,9 @@ public class Lexer {
             } else if (sourceCode.charAt(currentPos) == '*') {
                 while (hasNext()) {
                     currentPos++;
-                    if (sourceCode.charAt(currentPos) == '*') {
-                        currentPos++;
-                        if (hasNext() && sourceCode.charAt(currentPos) == '/')
-                        {
-                            currentPos++;
-                            break;
-                        }
+                    if (sourceCode.charAt(currentPos) == '*' && hasNext() && sourceCode.charAt(currentPos+1) == '/') {
+                        currentPos+=2;
+                        break;
                     }
                 }
                 return new Token(TokenType.ANNOSY, "", line);

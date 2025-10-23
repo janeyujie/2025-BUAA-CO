@@ -33,7 +33,7 @@ public class Parser {
     private Token peek(int offset) {
         int pos = currentPos + offset;
         if (pos >= tokens.size()) {
-            return tokens.get(tokens.size()-1); // 返回EOF token？
+            return tokens.get(tokens.size()-1); // 返回EOF token
         }
         return tokens.get(pos);
     }
@@ -163,14 +163,13 @@ public class Parser {
     private ConstDef parseConstDef() {
 
         ConstDef node = new ConstDef();
-        node.arrayIndexes = new ArrayList<>();
         node.identName = currentToken().getContent();
         // 匹配是否为标识符
         expect(TokenType.IDENFR, "ident_error", false);
 
         if (currentToken().getType() == TokenType.LBRACK) {
             consumeToken();
-            node.arrayIndexes.add(parseConstExp());
+            node.arrayIndex = parseConstExp();
             expect(TokenType.RBRACK, "k", true);
         }
 
@@ -184,13 +183,12 @@ public class Parser {
     private VarDef parseVarDef() {
 
         VarDef node = new VarDef();
-        node.arrayIndexes = new ArrayList<>();
         node.identName = currentToken().getContent();
         expect(TokenType.IDENFR, "ident_error", false);
 
         if (currentToken().getType() == TokenType.LBRACK) {
             consumeToken();
-            node.arrayIndexes.add(parseConstExp());
+            node.arrayIndex = parseConstExp();
             expect(TokenType.RBRACK, "k", true);
         }
 
@@ -210,20 +208,20 @@ public class Parser {
             // 后一种情况, 说明是对数组的初始化
             consumeToken();
             node.isArray = true;
-            node.arrayExprs = new ArrayList<>();
+            node.arrayInits = new ArrayList<>();
             // 有可能初始化为空(下一个token为rbrace)，也可能包含i个ConstExp
             if (currentToken().getType() != TokenType.RBRACE) {
-                node.arrayExprs.add(parseConstExp());
+                node.arrayInits.add(parseConstExp());
                 while(currentToken().getType() == TokenType.COMMA) {
                     consumeToken();
-                    node.arrayExprs.add(parseConstExp());
+                    node.arrayInits.add(parseConstExp());
                 }
             }
             // 不管有没有constexp都要匹配右大括号
             expect(TokenType.RBRACE, "rbrace_error", false);
         } else {
             node.isArray = false;
-            node.singleExpr = parseConstExp();
+            node.singleInit = parseConstExp();
         }
         printComponent("ConstInitVal");
         return node;
@@ -236,18 +234,18 @@ public class Parser {
         if (currentToken().getType() == TokenType.LBRACE) {
             consumeToken();
             node.isArray = true;
-            node.arrayExprs = new ArrayList<>();
+            node.arrayInits = new ArrayList<>();
             if (currentToken().getType() != TokenType.RBRACE) {
-                node.arrayExprs.add(parseExp());
+                node.arrayInits.add(parseExp());
                 while(currentToken().getType() == TokenType.COMMA) {
                     consumeToken();
-                    node.arrayExprs.add(parseExp());
+                    node.arrayInits.add(parseExp());
                 }
             }
             expect(TokenType.RBRACE, "rbrace_error", false);
         } else {
             node.isArray = false;
-            node.singleExpr = parseExp();
+            node.singleInit = parseExp();
         }
         printComponent("InitVal");
         return node;
@@ -342,8 +340,8 @@ public class Parser {
         while (currentToken().getType() != TokenType.RBRACE
         && currentToken().getType() != TokenType.EOFSY) {
             // BlockItem -> Decl | Stmt
-            // Decl -> const int | int
-            // Stmt -> LVal | ....
+            // Decl -> const int | [static] int
+            // Stmt -> Ident | ( | INTCON | + - ! | { | if for break continue return printf
             if (currentToken().getType() == TokenType.CONSTTK || currentToken().getType() == TokenType.INTTK || currentToken().getType() == TokenType.STATICTK) {
                 node.items.add(parseDecl());
             } else {
@@ -494,19 +492,24 @@ public class Parser {
         if (peek(offset).getType() == TokenType.LBRACK) {
             offset++;
 
-            while(peek(offset).getType() != TokenType.RBRACK
-            && peek(offset).getType() != TokenType.EOFSY) {
+            int cnt = 1;
+            while(peek(offset).getType() != TokenType.EOFSY
+            && cnt > 0) {
                 if (peek(offset).getType() == TokenType.ASSIGN){
                     return true;
                 }
+                if (peek(offset).getType() == TokenType.LBRACK) {
+                    cnt++;
+                }
+                if (peek(offset).getType() == TokenType.RBRACK) {
+                    cnt--;
+                }
                 offset++;
             }
-            if (peek(offset).getType() != TokenType.RBRACK) {
-                return false;
-            } else if (peek(offset).getType() == TokenType.EOFSY) {
+            if (cnt!=0 || peek(offset).getType() == TokenType.EOFSY) {
                 return false;
             }
-            offset++; //跳过']'
+            //offset++; //跳过']'
         }
 
         return peek(offset).getType() == TokenType.ASSIGN;
@@ -709,12 +712,20 @@ public class Parser {
             consumeToken();  // ident
             consumeToken();  // (
             node.args = new ArrayList<>();
-            if (currentToken().getType() != TokenType.RPARENT) {
+            // 这个地方需要预读，可能是没有右括号
+            if (currentToken().getType() != TokenType.RPARENT &&
+                (currentToken().getType() == TokenType.IDENFR ||
+                currentToken().getType() == TokenType.LPARENT ||
+                currentToken().getType() == TokenType.INTCON ||
+                currentToken().getType() == TokenType.PLUS ||
+                currentToken().getType() == TokenType.MINU ||
+                currentToken().getType() == TokenType.NOT)) {
+
                 node.args.addAll(parseFuncRParams());
             }
             expect(TokenType.RPARENT, "j", true);
             exp = node;
-        } else {
+        } else /*if (currentToken().getType() == TokenType.LPARENT || currentToken().getType() == TokenType.IDENFR || currentToken().getType() == TokenType.INTCON) */{
             // PrimaryExp -> '(' Exp ')' | LVal | Number
             // LVal -> Ident ['[' Exp ']']
             exp = parsePrimaryExp();
@@ -728,6 +739,9 @@ public class Parser {
         List<ExprNode> args = new ArrayList<>();
         args.add(parseExp());
         while (currentToken().getType() == TokenType.COMMA) {
+            if (peek(2).getType() == TokenType.ASSIGN) {
+                break;
+            }
             consumeToken();
             args.add(parseExp());
         }
@@ -755,6 +769,7 @@ public class Parser {
             // LVal
             exp = parseLVal();
         }
+
         printComponent("PrimaryExp");
         return exp;
     }

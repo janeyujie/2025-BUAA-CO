@@ -3,24 +3,24 @@ MAINTK main
 LPARENT (
 RPARENT )
 LBRACE {
-IDENFR f
-LPARENT (
-LPARENT (
-IDENFR a
+IDENFR i
 <LVal>
+ASSIGN =
+PLUS +
+<UnaryOp>
+MINU -
+<UnaryOp>
+PLUS +
+<UnaryOp>
+PLUS +
+<UnaryOp>
+INTCON 1
+<Number>
 <PrimaryExp>
 <UnaryExp>
-<MulExp>
-<AddExp>
-<Exp>
-RPARENT )
-<PrimaryExp>
 <UnaryExp>
-<MulExp>
-<AddExp>
-<Exp>
-<FuncRParams>
-RPARENT )
+<UnaryExp>
+<UnaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>

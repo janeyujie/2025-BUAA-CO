@@ -1,6 +1,5 @@
-c
-int main(){
+/***/
 
-    c[1 =1
+int main() {
 
 }
