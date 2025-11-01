@@ -290,6 +290,7 @@ public class Parser {
     private String parseFuncType() {
         String type;
         if (currentToken().getType() == TokenType.VOIDTK) {
+            // 等价于expect(TokenType.VOIDTK)
             consumeToken();
             type = "void";
         } else {
@@ -455,15 +456,42 @@ public class Parser {
                 // LVal → Ident ['[' Exp ']']
                 // Exp也可以是ident开头的 还包含了 ident(FuncRParam) 函数调用
                 // 先用预读看看当前是不是一个赋值表达式
-                if (isAssignStmt()) {
-                    //consumeToken();
+//                if (isAssignStmt()) {
+//                    //consumeToken();
+//                    AssignStmt assignnode = new AssignStmt();
+//                    assignnode.lVal = (LVal) parseLVal();
+//                    expect(TokenType.ASSIGN, "assign_error", false);
+//                    assignnode.rValue = parseExp();
+//                    expect(TokenType.SEMICN, "i", true);
+//                    node = assignnode;
+//                } else {
+//                    ExprStmt exprnode = new ExprStmt();
+//                    exprnode.expr = parseExp();
+//                    expect(TokenType.SEMICN, "i", true);
+//                    node = exprnode;
+//                }
+                // 尝试回溯的逻辑
+                int pos = currentPos;
+                // 记录当时的输出位置和错误数量
+                int outputLen = outputBuilder.length();
+                int errorSize = errors.size();
+                // 先解析一个LVal
+                ExprNode lvalNode = parseLVal();
+                // 再判断接下来是不是等号
+                if (currentToken().getType() == TokenType.ASSIGN) {
+                    consumeToken();
                     AssignStmt assignnode = new AssignStmt();
-                    assignnode.lVal = (LVal) parseLVal();
-                    expect(TokenType.ASSIGN, "assign_error", false);
+                    assignnode.lVal = (LVal) lvalNode;
                     assignnode.rValue = parseExp();
                     expect(TokenType.SEMICN, "i", true);
                     node = assignnode;
                 } else {
+                    // 如果失败的话就要回滚
+                    currentPos = pos;
+                    outputBuilder.setLength(outputLen);
+                    while(errors.size() > errorSize) {
+                        errors.remove(errors.size() - 1);
+                    }
                     ExprStmt exprnode = new ExprStmt();
                     exprnode.expr = parseExp();
                     expect(TokenType.SEMICN, "i", true);

@@ -91,7 +91,7 @@ public class Lexer {
                 return new Token(TokenType.PRINTFTK, lexeme, line);
             } else {
                 return new Token(TokenType.IDENFR, lexeme, line);
-                //token.setType(TokenType.IDNET);
+                //token.setType(TokenType.IDENT);
             }
 
         } else if (Character.isDigit(currentChar)) {
@@ -222,7 +222,7 @@ public class Lexer {
                 currentPos++;
             }
             currentPos++;
-            // 字符串常量中应该包含引号吧
+            // 字符串常量中也包含引号
             String lexeme = sourceCode.substring(start, currentPos);
             return new Token(TokenType.STRCON, lexeme, line);
         }

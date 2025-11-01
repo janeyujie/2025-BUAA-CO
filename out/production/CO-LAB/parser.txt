@@ -1,26 +1,27 @@
+VOIDTK void
+<FuncType>
+IDENFR f
+LPARENT (
+INTTK int
+IDENFR a
+<FuncFParam>
+<FuncFParams>
+RPARENT )
+LBRACE {
+RBRACE }
+<Block>
+<FuncDef>
 INTTK int
 MAINTK main
 LPARENT (
 RPARENT )
 LBRACE {
-IDENFR i
+IDENFR a
 <LVal>
 ASSIGN =
-PLUS +
-<UnaryOp>
-MINU -
-<UnaryOp>
-PLUS +
-<UnaryOp>
-PLUS +
-<UnaryOp>
-INTCON 1
+INTCON 5
 <Number>
 <PrimaryExp>
-<UnaryExp>
-<UnaryExp>
-<UnaryExp>
-<UnaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
