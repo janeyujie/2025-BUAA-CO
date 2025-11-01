@@ -1,13 +1,34 @@
-VOIDTK void
-<FuncType>
-IDENFR f
-LPARENT (
+CONSTTK const
 INTTK int
-IDENFR a
-<FuncFParam>
-<FuncFParams>
+IDENFR CONV
+ASSIGN =
+HEXCON 0xfff
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<ConstExp>
+<ConstInitVal>
+<ConstDef>
+SEMICN ;
+<ConstDecl>
+INTTK int
+<FuncType>
+IDENFR func
+LPARENT (
 RPARENT )
 LBRACE {
+RETURNTK return
+HEXCON 0X86ab
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+SEMICN ;
+<Stmt>
 RBRACE }
 <Block>
 <FuncDef>
@@ -16,34 +37,77 @@ MAINTK main
 LPARENT (
 RPARENT )
 LBRACE {
-IDENFR a
+INTTK int
+IDENFR PI
+ASSIGN =
+IDENFR CONV
 <LVal>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
 PLUS +
+IDENFR func
 LPARENT (
-INTCON 3
+RPARENT )
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+<InitVal>
+<VarDef>
+SEMICN ;
+<VarDecl>
+REPEATTK repeat
+LBRACE {
+IDENFR PI
+<LVal>
+ASSIGN =
+IDENFR PI
+<LVal>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+PLUS +
+INTCON 1
 <Number>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
-PLUS +
-IDENFR b
+<Exp>
+SEMICN ;
+<Stmt>
+RBRACE }
+<Block>
+<Stmt>
+UNTILTK until
+LPARENT (
+IDENFR PI
 <LVal>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
-<Exp>
-RPARENT )
+<RelExp>
+GRE >
+INTCON 100
+<Number>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
-MULT *
-INTCON 2
+<AddExp>
+<RelExp>
+<EqExp>
+<LAndExp>
+<LOrExp>
+<Cond>
+RPARENT )
+SEMICN ;
+<Stmt>
+RETURNTK return
+INTCON 0
 <Number>
 <PrimaryExp>
 <UnaryExp>

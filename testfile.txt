@@ -1,6 +1,16 @@
-/***/
-void f(int a){}
+const int CONV = 0xfff;
 
-int main() {
-    a + (3 + b) * 2;
+int func() {
+   return 0X86ab;
+}
+
+int main()
+{
+    int PI = CONV + func();
+
+    repeat{
+        PI = PI + 1;
+
+    }until(PI > 100);
+    return 0;
 }

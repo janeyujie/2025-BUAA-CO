@@ -447,6 +447,18 @@ public class Parser {
                 expect(TokenType.SEMICN, "i", true);
                 node = printfnode;
                 break;
+            case REPEATTK:
+                // 'repeat' Stmt 'until' '(' Cond ')' ';'
+                consumeToken();
+                RepeatStmt repeatnode = new RepeatStmt();
+                repeatnode.thenStmt = parseStmt();
+                expect(TokenType.UNTILTK, "until_error", true);
+                expect(TokenType.LPARENT, "lparent_error", false);
+                repeatnode.condition = parseCond();
+                expect(TokenType.RPARENT, "j", true);
+                expect(TokenType.SEMICN, "i", true);
+                node = repeatnode;
+                break;
             case SEMICN: // 空语句 ‘;’
                 consumeToken();
                 node = new ExprStmt(); // 返回一个空的expression
@@ -786,10 +798,16 @@ public class Parser {
             ExprNode node = parseExp();
             expect(TokenType.RPARENT, "j", true);
             exp = node;
-        } else if(currentToken().getType() == TokenType.INTCON) {
+        } else if (currentToken().getType() == TokenType.INTCON) {
             // Number情况
             Number node = new Number();
             node.value = Integer.parseInt(currentToken().getContent());
+            consumeToken();
+            exp = node;
+            printComponent("Number");
+        } else if (currentToken().getType() == TokenType.HEXCON) {
+            Number node = new Number();
+            node.hexValue = currentToken().getContent();
             consumeToken();
             exp = node;
             printComponent("Number");

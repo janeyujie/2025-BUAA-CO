@@ -41,7 +41,10 @@ public enum TokenType {
     ASSIGN("="),
     EOFSY("EOF"),
     ERRORSY("ERROR"),
-    ANNOSY("");
+    ANNOSY(""),
+    REPEATTK("repeat"),
+    UNTILTK("until"),
+    HEXCON("HexConst");
 
     private String value;
 

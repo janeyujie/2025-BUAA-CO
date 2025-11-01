@@ -89,13 +89,25 @@ public class Lexer {
                 return new Token(TokenType.VOIDTK, lexeme, line);
             } else if (lexeme.equals(TokenType.PRINTFTK.toString())){
                 return new Token(TokenType.PRINTFTK, lexeme, line);
-            } else {
+            } else if (lexeme.equals(TokenType.REPEATTK.toString())){
+                return new Token(TokenType.REPEATTK, lexeme, line);
+            } else if (lexeme.equals(TokenType.UNTILTK.toString())){
+                return new Token(TokenType.UNTILTK, lexeme, line);
+            }else {
                 return new Token(TokenType.IDENFR, lexeme, line);
                 //token.setType(TokenType.IDENT);
             }
 
         } else if (Character.isDigit(currentChar)) {
             int start = currentPos;
+            if (currentChar == '0' && (sourceCode.charAt(currentPos + 1) == 'x' || sourceCode.charAt(currentPos + 1) == 'X')) {
+                currentPos+=2;
+                while (hasNext() && isHexDigit(sourceCode.charAt(currentPos))) {
+                    currentPos++;
+                }
+                String lexeme = sourceCode.substring(start, currentPos);
+                return new Token(TokenType.HEXCON, lexeme, line);
+            }
             while (hasNext() && Character.isDigit(sourceCode.charAt(currentPos))) {
                 currentPos++;
             }
@@ -241,6 +253,15 @@ public class Lexer {
             } else {
                 break;
             }
+        }
+    }
+
+    private boolean isHexDigit(Character ch) {
+        if (Character.isDigit(ch) || ch == 'a' || ch == 'b' || ch == 'c' || ch == 'd' || ch == 'e' || ch == 'f'
+                || ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D' || ch == 'E' || ch == 'F') {
+            return true;
+        } else {
+            return false;
         }
     }
 }
