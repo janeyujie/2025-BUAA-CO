@@ -1,6 +1,6 @@
-/***/
-void f(int a){}
+
 
 int main() {
-    a + (3 + b) * 2;
+    printf("%d, %d", a, b);
+    return 0;
 }

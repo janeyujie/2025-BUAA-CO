@@ -6,3 +6,11 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+
+../error.txt
+../lexer.txt
+../parser.txt
+../testfile.txt
+../docs
+../.idea
+../out

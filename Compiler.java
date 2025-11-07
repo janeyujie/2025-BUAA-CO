@@ -1,5 +1,9 @@
-import ast.Node;
-import frontend.*;
+import sysy.error.Error;
+import sysy.frontend.parser.ast.Node;
+import sysy.frontend.lexer.Lexer;
+import sysy.frontend.lexer.Token;
+import sysy.frontend.parser.Parser;
+import sysy.frontend.visitor.SemanticAnalyzer;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +15,8 @@ import java.util.List;
 public class Compiler {
 
     private final String sourceCode;
-    List<SyntaxError> errors = new ArrayList<>();
+
+    List<Error> errors = new ArrayList<>();
 
     public Compiler(String sourceCode) {
         this.sourceCode = sourceCode;
@@ -28,20 +33,26 @@ public class Compiler {
         Parser parser = new Parser(tokens);
         Node tree = parser.parse(); // 启动语法分析，得到一个AST
         errors.addAll(parser.getErrors());
+        String parserOutput = parser.getOutput();
+        Files.write(Paths.get("parser.txt"), parserOutput.getBytes());
 
-        // 输出
+        // 进行语义分析
+        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        analyzer.visit(tree);
+        errors.addAll(analyzer.getErrors());
         if (!errors.isEmpty()) {
             writeErrors(errors);
-        } else {
-            String parserOutput = parser.getOutput();
-            Files.write(Paths.get("parser.txt"), parserOutput.getBytes());
+        } else{
+            System.out.println(analyzer.getSymbolTable());
+            Files.write(Paths.get("symbol.txt"), analyzer.getSymbolTable().getBytes());
         }
+
     }
 
-    private void writeErrors(List<SyntaxError> errors) throws IOException {
+    private void writeErrors(List<Error> errors) throws IOException {
         Collections.sort(errors); //按行号排序
         StringBuilder errorOutput = new StringBuilder();
-        for (SyntaxError error : errors) {
+        for (Error error : errors) {
             errorOutput.append(error.toString()).append("\n");
         }
         Files.write(Paths.get("error.txt"), errorOutput.toString().getBytes());
@@ -49,20 +60,13 @@ public class Compiler {
 
     public static void main(String[] args) {
         String inputPath = "testfile.txt";
-        String outputPath = "lexer.txt";
-        String errorPath = "error.txt";
+
         try {
             String sourceCode = new String(Files.readAllBytes(Paths.get(inputPath)));
             //System.out.println(sourceCode);
             Compiler compiler = new Compiler(sourceCode);
             compiler.compile();
 
-            /*if (!compiler.lexicalError.isEmpty()) {
-                Files.write(Paths.get(errorPath), compiler.lexicalError.getBytes());
-            } else {
-                Files.write(Paths.get(outputPath), compiler.lexerString.getBytes());
-            }*/
-            //System.out.print(compiler.output);
         } catch (IOException e) {
             System.err.println("Error reading or writing file: " + e.getMessage());
             e.printStackTrace();

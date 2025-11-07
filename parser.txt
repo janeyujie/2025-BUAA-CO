@@ -1,36 +1,20 @@
-VOIDTK void
-<FuncType>
-IDENFR f
-LPARENT (
-INTTK int
-IDENFR a
-<FuncFParam>
-<FuncFParams>
-RPARENT )
-LBRACE {
-RBRACE }
-<Block>
-<FuncDef>
 INTTK int
 MAINTK main
 LPARENT (
 RPARENT )
 LBRACE {
+PRINTFTK printf
+LPARENT (
+STRCON "%d, %d"
+COMMA ,
 IDENFR a
 <LVal>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
-PLUS +
-LPARENT (
-INTCON 3
-<Number>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-PLUS +
+<Exp>
+COMMA ,
 IDENFR b
 <LVal>
 <PrimaryExp>
@@ -39,11 +23,10 @@ IDENFR b
 <AddExp>
 <Exp>
 RPARENT )
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-MULT *
-INTCON 2
+SEMICN ;
+<Stmt>
+RETURNTK return
+INTCON 0
 <Number>
 <PrimaryExp>
 <UnaryExp>
