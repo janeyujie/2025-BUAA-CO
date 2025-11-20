@@ -15,6 +15,7 @@ import java.util.Objects;
 public class SemanticAnalyzer implements Visitor {
 
     private SymbolTable currentTable;
+    private SymbolTable globalTable;
     private final List<SemanticError> errors = new ArrayList<>();
 
     // 检查函数的return
@@ -28,6 +29,11 @@ public class SemanticAnalyzer implements Visitor {
 
     public SemanticAnalyzer() {
         this.currentTable = new SymbolTable();
+        this.globalTable = this.currentTable;
+    }
+
+    public SymbolTable getGlobalTable() {
+        return globalTable;
     }
 
     public List<SemanticError> getErrors() {
@@ -84,6 +90,7 @@ public class SemanticAnalyzer implements Visitor {
         }
         // 进入函数体
         currentTable = currentTable.createSubTable();
+        node.scope = currentTable;
 
         if (node.params != null) {
             for (FuncFParam param : node.params) {
@@ -94,6 +101,7 @@ public class SemanticAnalyzer implements Visitor {
                     errors.add(new SemanticError(param.lineNumber, "b"));
                 }
                 sym.isArray = param.isArray;
+                sym.isParam = true;
                 sym.table = currentTable;
                 currentTable.insertSymbol(sym);
                 funcSymbol.params.add(sym);
@@ -133,41 +141,6 @@ public class SemanticAnalyzer implements Visitor {
     }
 
     @Override
-    public VisitResult visit(VarDecl node) {
-        this.isVarDefStatic = node.isStatic;
-        for(VarDef def: node.varDefs) {
-            def.accept(this);
-        }
-        this.isVarDefStatic = false;
-        return null;
-    }
-
-    // 暂时不管变量的初始值
-    public VisitResult visit(VarDef node) {
-        // 检查变量是否重复定义
-        if (currentTable.contains(node.identName)) {
-            errors.add(new SemanticError(node.lineNumber, "b"));
-        }
-        VarSymbol sym = new VarSymbol();
-        sym.ident = node.identName;
-        if (this.isVarDefStatic)
-            sym.btype = 2;
-        else
-            sym.btype = 0;
-
-        if (node.arrayDim != null) {
-            sym.isArray = true;
-            sym.dim = node.arrayDim.accept(this).number;
-        } else {
-            sym.isArray = false;
-        }
-
-        sym.table = currentTable;
-        currentTable.insertSymbol(sym);
-        return null;
-    }
-
-    @Override
     public VisitResult visit(ConstDef node) {
 
         // 检查变量是否重复定义
@@ -178,6 +151,94 @@ public class SemanticAnalyzer implements Visitor {
         sym.ident = node.identName;
         sym.btype = 1;
         sym.isArray = node.arrayDim != null;
+        // 处理数组维度
+        if (node.arrayDim != null) {
+            sym.dim = node.arrayDim.accept(this).number;
+        }
+        // 处理初始值 constinit
+        sym.constArrayValues = new ArrayList<>();
+        if (node.initialValue != null) {
+            if (!sym.isArray) {
+                sym.constValue = node.initialValue.accept(this).number;
+            } else {
+                for (ExprNode exp : node.initialValue.arrayInits) {
+                    sym.constArrayValues.add(exp.accept(this).number);
+                }
+                for (int i=node.initialValue.arrayInits.size();i<sym.dim;i++) {
+                    sym.constArrayValues.add(0);
+                }
+            }
+        } else {
+            // 如果没有初始值，全都为0
+            if (!sym.isArray) {
+                sym.constValue = 0;
+            } else {
+                for (int i = 0; i < sym.dim; i++) {
+                    sym.constArrayValues.add(0);
+                }
+            }
+        }
+        sym.table = currentTable;
+        currentTable.insertSymbol(sym);
+        return null;
+    }
+
+    @Override
+    public VisitResult visit(VarDecl node) {
+        this.isVarDefStatic = node.isStatic;
+        for(VarDef def: node.varDefs) {
+            def.accept(this);
+        }
+        this.isVarDefStatic = false;
+        return null;
+    }
+
+    // 需要处理全局变量的初始值
+    public VisitResult visit(VarDef node) {
+        // 检查变量是否重复定义
+        if (currentTable.contains(node.identName)) {
+            errors.add(new SemanticError(node.lineNumber, "b"));
+        }
+        VarSymbol sym = new VarSymbol();
+        sym.ident = node.identName;
+        // 判断是否为局部静态变量
+        if (this.isVarDefStatic) sym.btype = 2;
+        else sym.btype = 0;
+
+        // 处理数组的维度
+        if (node.arrayDim != null) {
+            sym.isArray = true;
+            sym.dim = node.arrayDim.accept(this).number;
+        } else {
+            sym.isArray = false;
+        }
+
+        // 判断是否为全局变量/静态
+        if (this.currentFunc == null || sym.btype == 2) {
+            // 讨论初始值是否存在
+            sym.constArrayValues = new ArrayList<>();
+            if (node.initialValue != null) {
+                if (sym.isArray) {
+                    for (ExprNode exp : node.initialValue.arrayInits) {
+                        sym.constArrayValues.add(exp.accept(this).number);
+                    }
+                    for (int i=node.initialValue.arrayInits.size();i<sym.dim;i++) {
+                        sym.constArrayValues.add(0);
+                    }
+                } else {
+                    sym.constValue = node.initialValue.accept(this).number;
+                }
+            } else {
+                if (sym.isArray) {
+                    for (int i = 0; i < sym.dim; i++) {
+                        sym.constArrayValues.add(0);
+                    }
+                } else {
+                    sym.constValue = 0;
+                }
+            }
+
+        }
 
         sym.table = currentTable;
         currentTable.insertSymbol(sym);
@@ -202,6 +263,7 @@ public class SemanticAnalyzer implements Visitor {
         for(Node item: node.items) {
             if (item instanceof Block) {
                 currentTable = currentTable.createSubTable();
+                item.scope = currentTable;
                 item.accept(this);
                 currentTable = currentTable.preTable;
             } else {
@@ -221,6 +283,7 @@ public class SemanticAnalyzer implements Visitor {
 
         if (node.thenStmt instanceof Block) {
             currentTable = currentTable.createSubTable();
+            node.thenStmt.scope = currentTable;
             node.thenStmt.accept(this);
             currentTable = currentTable.preTable;
         } else {
@@ -230,6 +293,7 @@ public class SemanticAnalyzer implements Visitor {
         if (node.elseStmt != null) {
             if (node.elseStmt instanceof Block) {
                 currentTable = currentTable.createSubTable();
+                node.elseStmt.scope = currentTable;
                 node.elseStmt.accept(this);
                 currentTable = currentTable.preTable;
             } else {
@@ -262,6 +326,7 @@ public class SemanticAnalyzer implements Visitor {
         if (node.body != null) {
             if (node.body instanceof Block) {
                 currentTable = currentTable.createSubTable();
+                node.body.scope = currentTable;
                 node.body.accept(this);
                 currentTable = currentTable.preTable;
             } else
@@ -373,19 +438,25 @@ public class SemanticAnalyzer implements Visitor {
             errors.add(new SemanticError(node.lineNumber, "c"));
             return null;
         }
+        if (((VarSymbol) sym).btype == 1) {
+            res.ifConst = true;
+        }
         // 数组的情况
         // a[]是数组，a[1]不是
         if (((VarSymbol) sym).isArray && node.arrayIndex == null) {
             res.ifArray = true;
         } else {
             res.ifArray = false;
+            if (((VarSymbol) sym).btype == 1 && !(((VarSymbol) sym).isArray)) res.number = ((VarSymbol) sym).constValue;
         }
         if (node.arrayIndex != null) {
-            node.arrayIndex.accept(this);
+            res.number = node.arrayIndex.accept(this).number;
+            if (((VarSymbol) sym).btype == 1) {
+                int index = res.number;
+                res.number = ((VarSymbol) sym).constArrayValues.get(index);
+            }
         }
-        if (((VarSymbol) sym).btype == 1) {
-            res.ifConst = true;
-        }
+
         return res;
     }
 
@@ -393,14 +464,38 @@ public class SemanticAnalyzer implements Visitor {
     public VisitResult visit(BinaryOpExp node) {
         VisitResult res1 = node.left.accept(this);
         VisitResult res2 = node.right.accept(this);
-
-        // 不可能出现表达式左右类型不匹配的情况
-        return res1;
+        VisitResult res;
+        res = res1;
+        res.ifArray = false;
+        if (res1.ifConst && res2.ifConst)
+            switch (node.op) {
+                case ADD: res.number = res1.number+res2.number; break;
+                case SUB: res.number = res1.number-res2.number; break;
+                case MUL: res.number = res1.number*res2.number; break;
+                case DIV:
+                    res.number = res1.number/res2.number;
+                    break;
+                case MOD:
+                    res.number = res1.number%res2.number;
+                    break;
+        }
+        // 不可能出现表达式左右的类型不匹配的情况
+        return res;
     }
 
     @Override
     public VisitResult visit(UnaryExp node) {
-        VisitResult res = node.operand.accept(this);
+        VisitResult opRes = node.operand.accept(this);
+        VisitResult res = new VisitResult();
+
+        res.ifArray = false;
+        res.ifConst = opRes.ifConst;
+
+        switch (node.op) {
+            case POS: res.number = opRes.number; break;
+            case NEG: res.number = -opRes.number; break;
+            case NOT: res.number = (opRes.number == 0) ? 1 : 0; break;
+        }
         return res;
     }
 
@@ -450,6 +545,7 @@ public class SemanticAnalyzer implements Visitor {
     public VisitResult visit(Number number) {
         VisitResult res = new VisitResult();
         res.ifArray = false;
+        res.ifConst = true;
         res.number = number.value;
         return res;
     }

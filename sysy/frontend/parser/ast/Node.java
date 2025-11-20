@@ -1,10 +1,12 @@
 package sysy.frontend.parser.ast;
 
+import sysy.frontend.symtable.SymbolTable;
 import sysy.frontend.visitor.VisitResult;
 import sysy.frontend.visitor.Visitor;
 
 public abstract class Node {
     public int lineNumber;
+    public SymbolTable scope;
     /*private final List<Node> children= new ArrayList<>();
 
     public void addChild(Node child) {

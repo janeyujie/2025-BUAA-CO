@@ -1,9 +1,13 @@
 import sysy.error.Error;
+import sysy.frontend.parser.ast.CompUnit;
 import sysy.frontend.parser.ast.Node;
 import sysy.frontend.lexer.Lexer;
 import sysy.frontend.lexer.Token;
 import sysy.frontend.parser.Parser;
+import sysy.frontend.symtable.SymbolTable;
 import sysy.frontend.visitor.SemanticAnalyzer;
+import sysy.middle.ir.IrModule;
+import sysy.middle.ir.IrVisitor;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,9 +46,20 @@ public class Compiler {
         errors.addAll(analyzer.getErrors());
         if (!errors.isEmpty()) {
             writeErrors(errors);
+            System.out.println("Compilation failed!");
         } else{
             System.out.println(analyzer.getSymbolTable());
             Files.write(Paths.get("symbol.txt"), analyzer.getSymbolTable().getBytes());
+
+            // 开始生成IR
+            SymbolTable globalTable = analyzer.getGlobalTable();
+            IrVisitor irVisitor = new IrVisitor(globalTable);
+            irVisitor.visit((CompUnit) tree);
+            IrModule module = irVisitor.getModule();
+            List<String> irLines = module.irOutput();
+            String irCode = String.join("\n", irLines);
+            Files.write(Paths.get("llvm_ir.txt"), irCode.getBytes());
+            System.out.println("LLVM IR generated!");
         }
 
     }

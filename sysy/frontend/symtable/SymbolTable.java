@@ -8,7 +8,7 @@ public class SymbolTable {
     // 指向父作用域
     public SymbolTable preTable = null;
     // 指向其所有子作用域
-    public final List<SymbolTable> nextTables = new ArrayList<SymbolTable>();
+    public final List<SymbolTable> nextTables = new ArrayList<>();
     // 当前作用域的符号表
     public final Map<String, Symbol> symbolMap = new HashMap<>();
     // 用于输出符号表信息

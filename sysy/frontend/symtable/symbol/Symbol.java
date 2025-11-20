@@ -1,6 +1,7 @@
 package sysy.frontend.symtable.symbol;
 
 import sysy.frontend.symtable.SymbolTable;
+import sysy.middle.ir.IrType;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,4 +36,7 @@ public abstract class Symbol {
         }
         return table.scope + " " + ident + " " + type;
     }
+
+    // 只要处理变量类型
+    public abstract IrType getIrType();
 }
