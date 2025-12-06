@@ -237,7 +237,12 @@ public class SemanticAnalyzer implements Visitor {
                     sym.constValue = 0;
                 }
             }
-
+        }
+        else {
+            // 如果是局部变量的话也要考虑初始化
+            if (node.initialValue != null) {
+                node.initialValue.accept(this);
+            }
         }
 
         sym.table = currentTable;
@@ -436,8 +441,9 @@ public class SemanticAnalyzer implements Visitor {
         if (sym == null || sym instanceof FuncSymbol) {
             // 使用未定义的变量
             errors.add(new SemanticError(node.lineNumber, "c"));
-            return null;
+            return res;
         }
+        node.symbol = sym;
         if (((VarSymbol) sym).btype == 1) {
             res.ifConst = true;
         }
@@ -507,13 +513,13 @@ public class SemanticAnalyzer implements Visitor {
             if (!node.args.isEmpty()) {
                 errors.add(new SemanticError(node.lineNumber, "d"));
             }
-            return null;
+            return res;
         }
         Symbol sym = currentTable.getSymbol(node.funcName);
         // 函数未定义
         if (!(sym instanceof FuncSymbol)) {
             errors.add(new SemanticError(node.lineNumber, "c"));
-            return null;
+            return res;
         }
         if (Objects.equals(((FuncSymbol) sym).returnType, "int")) {
             res.ifArray = false;
@@ -523,7 +529,7 @@ public class SemanticAnalyzer implements Visitor {
         // 检查参数个数
         if (node.args.size() != params.size()) {
             errors.add(new SemanticError(node.lineNumber, "d"));
-            return null;
+            return res;
         }
 
         // 检查参数类型
@@ -534,7 +540,7 @@ public class SemanticAnalyzer implements Visitor {
             if (res1 != null && res1.ifArray != params.get(i).isArray) {
                 // 参数类型不匹配
                 errors.add(new SemanticError(node.lineNumber, "e"));
-                //return null;
+                //return res;
             }
         }
 

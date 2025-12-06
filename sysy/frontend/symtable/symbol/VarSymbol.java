@@ -1,6 +1,6 @@
 package sysy.frontend.symtable.symbol;
 
-import sysy.middle.ir.IrType;
+import sysy.middle.ir.type.IrType;
 
 import java.util.List;
 

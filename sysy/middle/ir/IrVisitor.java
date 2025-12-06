@@ -7,6 +7,12 @@ import sysy.frontend.symtable.symbol.Symbol;
 import sysy.frontend.symtable.symbol.VarSymbol;
 import sysy.frontend.visitor.VisitResult;
 import sysy.frontend.visitor.Visitor;
+import sysy.middle.ir.instruction.*;
+import sysy.middle.ir.type.IrType;
+import sysy.middle.ir.value.IrConstant;
+import sysy.middle.ir.value.IrGlobalVariable;
+import sysy.middle.ir.value.IrParamValue;
+import sysy.middle.ir.value.IrValue;
 
 import java.util.*;
 
@@ -29,6 +35,7 @@ public class IrVisitor implements Visitor {
     private int globalVarCounter = 0;
     private int tempVarCounter = 0;
     private int labelCounter = 0;
+    private int staticVarCounter = 0;
 
     // 生成唯一的全局变量名
     private String newGlobalName() {
@@ -67,12 +74,15 @@ public class IrVisitor implements Visitor {
         return instr;
     }
 
-     //查找 LVal 对应的指针
-     //返回 IrValue 这个 LVal 在内存中的地址 (e.g., %a.ptr)
+     //查找 LVal 对应的指针, 返回 IrValue 这个 LVal 在内存中的地址 %a.ptr
     private IrValue getLValPtr(LVal node) {
-        // 在符号表中找到 "a" 的定义
-        Symbol sym = currentTable.getSymbol(node.identName);
+        // 直接使用语义分析中给lval绑定的符号
+        Symbol sym = node.symbol;
         IrValue ptr = valueMap.get(sym);
+
+        if (ptr == null) {
+            throw new RuntimeException("变量 " + node.identName + " 在使用前未定义 (IrValue 为空)!");
+        }
 
         if (node.arrayIndex != null) {
             // 数组——计算索引 i 并创建GEP指令
@@ -232,16 +242,21 @@ public class IrVisitor implements Visitor {
         for (VarDef def : node.varDefs) {
             Symbol sym = currentTable.getSymbol(def.identName);
             IrType type = sym.getIrType();
-            //String globalName = newGlobalName();
+            String globalName;
 
             boolean ifStatic = (sym instanceof VarSymbol) && (((VarSymbol) sym).btype == 2);
             if (currentFunction == null || ifStatic) {
+                // 一定是静态局部变量
+                if (currentFunction != null && ifStatic) {
+                    String funcName = currentFunction.name.substring(1);
+                    globalName = funcName + "_" + def.identName + "_" + staticVarCounter++;
+                } else {
+                    // 全局变量不能重名
+                    globalName = "g_" + def.identName;
+                }
                 // 全局变量的初始化应该是这样的@a = dso_local global [6 x i32] [i32 1, i32 2, i32 3, i32 4, i32 5, i32 6]
                 IrGlobalVariable gv;
-                // 静态变量只可能在局部出现
-                String globalName = ifStatic ?
-                        (currentFunction.name + "." + def.identName).substring(1) :
-                        def.identName;
+
                 // initValue不可能为空，如果是全局的话必须初始值为const
                 if (def.initialValue != null) {
                     if (def.initialValue.isArray) {
@@ -249,22 +264,8 @@ public class IrVisitor implements Visitor {
                         for (Integer init : ((VarSymbol)sym).constArrayValues) {
                             inits.add(new IrConstant(init));
                         }
-//                        List<IrConstant> inits = new ArrayList<>();
-//                        for (ExprNode initExp : def.initialValue.arrayInits) {
-//                            IrValue val = initExp.accept(this).value;
-//                            if (!(val instanceof IrConstant)) {
-//                                throw new RuntimeException("全局数组 " + def.identName + " 的初始值不是常量!");
-//                            }
-//                            inits.add((IrConstant) val);
-//                        }
                         gv = new IrGlobalVariable(globalName, type, inits, false);
                     } else {
-//                        IrValue initVal = def.initialValue.accept(this).value;
-//                        if (initVal instanceof IrConstant) {
-//                            gv = new IrGlobalVariable(globalName, type, (IrConstant) initVal, false);
-//                        } else {
-//                            throw new RuntimeException("全局变量 " + def.identName + " 的初始值不是一个常量!");
-//                        }
                         gv = new IrGlobalVariable(globalName, type, new IrConstant(((VarSymbol)sym).constValue), false);
                     }
 
@@ -456,6 +457,11 @@ public class IrVisitor implements Visitor {
 
     @Override
     public VisitResult visit(PrintfStmt node) {
+        // 先把printf后面的表达式解析了，防止printf顺序出问题
+        List<IrValue> args = new ArrayList<>();
+        for (ExprNode arg : node.args) {
+            args.add(arg.accept(this).value);
+        }
         // 解析格式化字符串, 拆解成 putint, putch
         String formatString = node.formatString;
         int argIndex = 0;
@@ -464,7 +470,7 @@ public class IrVisitor implements Visitor {
             if (formatString.startsWith("%d", i)) {
                 // 遇到 %d
                 IrFunction putint = module.getFunction("putint");
-                IrValue val = node.args.get(argIndex++).accept(this).value;
+                IrValue val = args.get(argIndex++);
                 addInstr(new IrCall(putint, List.of(val)));
                 i++; // 跳过 'd'
             } else {
@@ -533,7 +539,7 @@ public class IrVisitor implements Visitor {
     @Override
     public VisitResult visit(LVal node) {
         // 检查 LVal 本身是否为函数调用的数组
-        Symbol sym = currentTable.getSymbol(node.identName);
+        Symbol sym = node.symbol;
         boolean isBaseArray = (sym instanceof VarSymbol)
                 && ((VarSymbol) sym).isArray
                 && (node.arrayIndex == null);
@@ -567,60 +573,81 @@ public class IrVisitor implements Visitor {
             IrBasicBlock finalBlock = currentFunction.createBasicBlock(newLabel(""));
             IrBasicBlock startBlock = currentBlock; // 记住我们从哪里开始
 
+            // 在当前块分配一个临时变量存结果 (i32)
+            IrAlloca resultPtr = new IrAlloca(IrType.getInt32());
+            addInstr(resultPtr);
+
             // 访问 A, 并将其转为 i1
             IrValue leftBool = convertOpToBool(left);
-//            if (left instanceof IrConstant &&
-//                    ((IrConstant)left).value == 0) {
-//                // 直接返回 false, 完全不访问 node.right
-//                return new VisitResult(IrConstant.FALSE);
-//            }
-            // 在 startBlock 终结
-            addInstr(new IrBranch(leftBool, checkRhsBlock, finalBlock));
+            // 如果左值为假，则结果为0，存入 resultPtr，跳到 final
+            IrBasicBlock shortCircuitBlock = currentFunction.createBasicBlock(newLabel(""));
+            addInstr(new IrBranch(leftBool, checkRhsBlock, shortCircuitBlock));
+
+            // 填充 ShortCircuit 块 (左为假)
+            this.currentBlock = shortCircuitBlock;
+            addInstr(new IrStore(IrConstant.ZERO, resultPtr)); // store 0
+            addInstr(new IrBranch(finalBlock));
 
             // B(RHS 块
             this.currentBlock = checkRhsBlock;
             IrValue rightVal = node.right.accept(this).value;
             IrValue rightBool = convertOpToBool(rightVal);
-            IrBasicBlock rhsEndBlock = currentBlock; // 记住 B 的结束位置
+
+            IrValue rightI32 = addInstr(new IrZext(rightBool, IrType.getInt32()));
+            addInstr(new IrStore(rightI32, resultPtr));
             addInstr(new IrBranch(finalBlock)); // B -> final
 
             // final块
             this.currentBlock = finalBlock;
-            IrPhi phi = new IrPhi(IrType.getInt1());
+            // 从内存中加载最终结果
+            IrValue result = addInstr(new IrLoad(resultPtr));
+            return new VisitResult(result);
+            //IrPhi phi = new IrPhi(IrType.getInt1());
 
             // 如果 A=false, 结果是 false (i1 0)
-            phi.addIncoming(IrConstant.FALSE, startBlock);
+            //phi.addIncoming(IrConstant.FALSE, startBlock);
             // "如果 A=true, 结果是 B 的值
-            phi.addIncoming(rightBool, rhsEndBlock);
+            //phi.addIncoming(rightBool, rhsEndBlock);
             // phi 指令本身会产生一个 IrValue, 这就是 A && B 的最终结果
-            return new VisitResult(addInstr(phi));
+            //return new VisitResult(addInstr(phi));
         } else if (node.op == Operator.OR) {
             IrBasicBlock checkRhsBlock = currentFunction.createBasicBlock(newLabel(""));
             IrBasicBlock finalBlock = currentFunction.createBasicBlock(newLabel(""));
             IrBasicBlock startBlock = currentBlock;
 
+            IrAlloca resultPtr = new IrAlloca(IrType.getInt32());
+            addInstr(resultPtr);
+
             IrValue leftBool = convertOpToBool(left);
-//            if (left instanceof IrConstant &&
-//                    ((IrConstant)left).value == 1) {
-//                // 直接返回 True, 完全不访问 node.right
-//                return new VisitResult(IrConstant.TRUE);
-//            }
 
-            addInstr(new IrBranch(leftBool, finalBlock, checkRhsBlock));
+            IrBasicBlock shortCircuitBlock = currentFunction.createBasicBlock(newLabel(""));
+            addInstr(new IrBranch(leftBool, shortCircuitBlock, checkRhsBlock));
 
-            currentBlock = checkRhsBlock;
-            IrValue rightVal = node.right.accept(this).value;
-            IrValue rightBool = convertOpToBool(rightVal);
-            IrBasicBlock rhsEndBlock = currentBlock;
+            // 填充 ShortCircuit 块 (左为真)
+            this.currentBlock = shortCircuitBlock;
+            addInstr(new IrStore(new IrConstant(1), resultPtr)); // store 1
             addInstr(new IrBranch(finalBlock));
 
-            currentBlock = finalBlock;
-            IrPhi phi = new IrPhi(IrType.getInt1());
-            // A=true 结果就是true
-            phi.addIncoming(IrConstant.TRUE, startBlock);
-            // A=false 就还要再算B的值
-            phi.addIncoming(rightBool, rhsEndBlock);
-            return new VisitResult(addInstr(phi));
+            // 填充 CheckRhs 块 (左为假)
+            this.currentBlock = checkRhsBlock;
+            IrValue rightVal = node.right.accept(this).value;
+            IrValue rightBool = convertOpToBool(rightVal);
+
+            // Store 右值
+            IrValue rightI32 = addInstr(new IrZext(rightBool, IrType.getInt32()));
+            addInstr(new IrStore(rightI32, resultPtr));
+            addInstr(new IrBranch(finalBlock));
+
+            // 进入final块
+            this.currentBlock = finalBlock;
+            IrValue result = addInstr(new IrLoad(resultPtr));
+            return new VisitResult(result);
+//            IrPhi phi = new IrPhi(IrType.getInt1());
+//            // A=true 结果就是true
+//            phi.addIncoming(IrConstant.TRUE, startBlock);
+//            // A=false 就还要再算B的值
+//            phi.addIncoming(rightBool, rhsEndBlock);
+//            return new VisitResult(addInstr(phi));
         }
         IrValue right = node.right.accept(this).value;
         // 如果存在i1类型都转成i32
@@ -645,9 +672,6 @@ public class IrVisitor implements Visitor {
             case LE: op = new IrCompare("sle", left, right); break;
             case GT: op = new IrCompare("sgt", left, right); break;
             case GE: op = new IrCompare("sge", left, right); break;
-
-            // 逻辑运算 (SysY 似乎不支持 && ||, 但如果支持)
-            // case AND: op = new IrBinaryOp("and", left, right); break;
 
             default: throw new RuntimeException("未知的二元运算符: " + node.op);
         }

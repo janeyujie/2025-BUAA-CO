@@ -1,3 +1,5 @@
+import sysy.backend.MipsBuilder;
+import sysy.backend.MipsModule;
 import sysy.error.Error;
 import sysy.frontend.parser.ast.CompUnit;
 import sysy.frontend.parser.ast.Node;
@@ -47,7 +49,7 @@ public class Compiler {
         if (!errors.isEmpty()) {
             writeErrors(errors);
             System.out.println("Compilation failed!");
-        } else{
+        } else {
             System.out.println(analyzer.getSymbolTable());
             Files.write(Paths.get("symbol.txt"), analyzer.getSymbolTable().getBytes());
 
@@ -60,12 +62,20 @@ public class Compiler {
             String irCode = String.join("\n", irLines);
             Files.write(Paths.get("llvm_ir.txt"), irCode.getBytes());
             System.out.println("LLVM IR generated!");
+
+            // 生成MIPS
+            MipsBuilder mipsBuilder = new MipsBuilder();
+            MipsModule mipsModule = mipsBuilder.build(module);
+            List<String> mipsLines = mipsModule.mipsOutput();
+            String mipsCode = String.join("\n", mipsLines);
+            Files.write(Paths.get("mips.txt"), mipsCode.getBytes());
+            System.out.println("MIPS generated!");
         }
 
     }
 
     private void writeErrors(List<Error> errors) throws IOException {
-        Collections.sort(errors); //按行号排序
+        Collections.sort(errors); // 按行号排序
         StringBuilder errorOutput = new StringBuilder();
         for (Error error : errors) {
             errorOutput.append(error.toString()).append("\n");
@@ -78,7 +88,7 @@ public class Compiler {
 
         try {
             String sourceCode = new String(Files.readAllBytes(Paths.get(inputPath)));
-            //System.out.println(sourceCode);
+            // System.out.println(sourceCode);
             Compiler compiler = new Compiler(sourceCode);
             compiler.compile();
 
@@ -86,7 +96,7 @@ public class Compiler {
             System.err.println("Error reading or writing file: " + e.getMessage());
             e.printStackTrace();
         } catch (RuntimeException e) {
-            //System.err.println("Compilation Error: " + e.getMessage());
+            // System.err.println("Compilation Error: " + e.getMessage());
             e.printStackTrace();
         }
 

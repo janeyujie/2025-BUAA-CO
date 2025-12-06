@@ -1,5 +1,9 @@
 package sysy.middle.ir;
 
+import sysy.middle.ir.type.IrType;
+import sysy.middle.ir.value.IrGlobalVariable;
+import sysy.middle.ir.value.IrParamValue;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

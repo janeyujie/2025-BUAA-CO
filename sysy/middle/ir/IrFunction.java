@@ -1,5 +1,10 @@
 package sysy.middle.ir;
 
+import sysy.middle.ir.instruction.IrBasicBlock;
+import sysy.middle.ir.type.IrType;
+import sysy.middle.ir.value.IrParamValue;
+import sysy.middle.ir.value.IrValue;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

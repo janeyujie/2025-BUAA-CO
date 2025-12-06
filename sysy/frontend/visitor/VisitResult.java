@@ -1,6 +1,6 @@
 package sysy.frontend.visitor;
 
-import sysy.middle.ir.IrValue;
+import sysy.middle.ir.value.IrValue;
 
 import java.util.List;
 

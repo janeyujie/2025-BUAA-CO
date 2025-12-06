@@ -1,9 +1,8 @@
 package sysy.frontend.symtable.symbol;
 
 import sysy.frontend.symtable.SymbolTable;
-import sysy.middle.ir.IrType;
+import sysy.middle.ir.type.IrType;
 
-import java.util.List;
 import java.util.Objects;
 
 // 应该还是需要把func和var分开

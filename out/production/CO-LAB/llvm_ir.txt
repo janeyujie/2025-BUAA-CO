@@ -2,421 +2,910 @@ declare i32 @getint()
 declare void @putint(i32)
 declare void @putch(i32)
 
-@globalVar = dso_local global i32 0
-@var6 = dso_local global i32 zeroinitializer
-@globalVar1 = dso_local global i32 zeroinitializer
-@globalVar2 = dso_local global i32 0
-@vec = dso_local global [10 x i32] zeroinitializer
-@vec1 = dso_local global [10 x i32] [i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0, i32 0]
-@global_var_0 = dso_local constant i32 0
-@global_var_1 = dso_local constant [2 x i32] [i32 1, i32 2]
-@global_var_2 = dso_local constant i32 3
-@declareFunc.var = dso_local global i32 zeroinitializer
-@declareFunc.vars = dso_local global [10 x i32] zeroinitializer
-@declareFunc.var2 = dso_local global i32 zeroinitializer
-@shortPath.sum = dso_local global i32 0
+@g_i = dso_local global i32 zeroinitializer
+@g_ii = dso_local global i32 0
+@g_global_var = dso_local global i32 0
+@func_x_0 = dso_local global i32 1
+@func_x1_1 = dso_local global i32 1
+@func_x2_2 = dso_local global i32 2
 
-define dso_local void @declareFunc() {
+define dso_local i32 @func() {
 _0:
   %t0 = alloca i32
   %t1 = alloca i32
-  store i32 1, i32* %t1
   %t2 = alloca i32
-  store i32 1, i32* @declareFunc.var
-  %t3 = load i32, i32* @global_var_0
-  %t4 = getelementptr inbounds [10 x i32], [10 x i32]* @declareFunc.vars, i32 0, i32 0
-  store i32 %t3, i32* %t4
+  store i32 0, i32* %t0
+  store i32 0, i32* %t1
+  store i32 0, i32* %t2
+  br label %_1
+_1:
+  br label %_2
+_2:
+  br label %_3
+_3:
+  %t3 = load i32, i32* %t0
+  %t4 = add i32 %t3, 1
+  store i32 %t4, i32* %t0
+  %t5 = load i32, i32* %t1
+  %t6 = add i32 %t5, 2
+  store i32 %t6, i32* %t1
+  %t7 = load i32, i32* %t2
+  %t8 = add i32 %t7, 3
+  store i32 %t8, i32* %t2
+  br label %_1
+_4:
+  %t9 = load i32, i32* @g_global_var
+  %t10 = add i32 %t9, 1
+  store i32 %t10, i32* @g_global_var
+  ret i32 1
+}
+
+define dso_local void @func1() {
+_5:
+  call void @putch(i32 99)
+  call void @putch(i32 114)
+  call void @putch(i32 115)
+  call void @putch(i32 98)
+  call void @putch(i32 10)
   ret void
 }
 
-define dso_local i32 @shortPath(i32 %a) {
-_1:
-  %t5 = alloca i32
-  store i32 %a, i32* %t5
-  %t6 = load i32, i32* @shortPath.sum
-  %t7 = add i32 %t6, 1
-  store i32 %t7, i32* @shortPath.sum
-  %t8 = load i32, i32* @shortPath.sum
-  ret i32 %t8
-}
-
-define dso_local i32 @caculateFunc(i32 %a, i32 %b, i32* %c) {
-_2:
-  %t9 = alloca i32
-  store i32 %a, i32* %t9
-  %t10 = alloca i32
-  store i32 %b, i32* %t10
-  %t11 = load i32, i32* %t9
-  %t12 = load i32, i32* %t10
-  %t13 = icmp sgt i32 %t11, %t12
-  br i1 %t13, label %_3, label %_4
-_3:
-  ret i32 0
-_4:
-  %t14 = load i32, i32* %t9
-  %t15 = load i32, i32* %t10
-  %t16 = icmp ne i32 %t14, %t15
-  br i1 %t16, label %_5, label %_6
-_5:
-  ret i32 0
+define dso_local i32 @func2(i32 %a) {
 _6:
-  %t17 = load i32, i32* %t9
-  %t18 = getelementptr inbounds i32, i32* %c, i32 0
-  %t19 = load i32, i32* %t18
-  %t20 = icmp ne i32 %t17, %t19
-  br i1 %t20, label %_7, label %_8
-_7:
-  %t21 = getelementptr inbounds i32, i32* %c, i32 0
-  %t22 = load i32, i32* %t21
-  ret i32 %t22
-_8:
-  %t23 = alloca i32
-  store i32 0, i32* %t23
-  br label %_9
-_9:
-  %t24 = load i32, i32* %t23
-  %t25 = load i32, i32* %t9
-  %t26 = icmp sle i32 %t24, %t25
-  br i1 %t26, label %_10, label %_12
-_10:
-  %t27 = load i32, i32* %t10
-  %t28 = icmp eq i32 %t27, 0
-  br i1 %t28, label %_13, label %_14
-_11:
-  %t44 = load i32, i32* %t23
-  %t45 = add i32 %t44, 1
-  store i32 %t45, i32* %t23
-  br label %_9
-_12:
-  %t46 = load i32, i32* %t10
-  ret i32 %t46
-_13:
-  br label %_12
-_14:
-  %t29 = getelementptr inbounds i32, i32* %c, i32 0
-  %t30 = load i32, i32* %t29
-  %t31 = icmp ne i32 %t30, 0
-  br i1 %t31, label %_18, label %_17
-_15:
-  br label %_11
-_16:
-  %t34 = icmp ne i32 0, 0
-  br i1 %t34, label %_21, label %_22
-_17:
-  %t32 = icmp ne i32 1, 0
-  br label %_18
-_18:
-  %t33 = phi i1 [1, %_14], [%t32, %_17]
-  br i1 %t33, label %_15, label %_16
-_19:
-  br label %_12
-_20:
-  %t39 = icmp ne i32 1, 0
-  br i1 %t39, label %_26, label %_25
-_21:
-  %t35 = load i32, i32* %t9
-  %t36 = call i32 @shortPath(i32 %t35)
-  %t37 = icmp ne i32 %t36, 0
-  br label %_22
-_22:
-  %t38 = phi i1 [0, %_16], [%t37, %_21]
-  br i1 %t38, label %_19, label %_20
-_23:
-  br label %_12
-_24:
-  br label %_11
-_25:
-  %t40 = load i32, i32* %t10
-  %t41 = call i32 @shortPath(i32 %t40)
-  %t42 = icmp ne i32 %t41, 0
-  br label %_26
-_26:
-  %t43 = phi i1 [1, %_20], [%t42, %_25]
-  br i1 %t43, label %_23, label %_24
+  %t11 = alloca i32
+  store i32 %a, i32* %t11
+  %t12 = load i32, i32* %t11
+  call void @putint(i32 %t12)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 114)
+  call void @putch(i32 115)
+  call void @putch(i32 98)
+  call void @putch(i32 10)
+  %t13 = load i32, i32* %t11
+  ret i32 %t13
 }
 
-define dso_local i32 @sum(i32* %a, i32 %n) {
-_27:
-  %t47 = alloca i32
-  store i32 %n, i32* %t47
-  %t48 = alloca i32
-  store i32 0, i32* %t48
-  %t49 = alloca i32
-  %t50 = alloca i32
-  store i32 0, i32* %t49
-  br label %_28
-_28:
-  %t51 = load i32, i32* %t49
-  %t52 = load i32, i32* %t47
-  %t53 = icmp slt i32 %t51, %t52
-  br i1 %t53, label %_29, label %_31
-_29:
-  %t54 = load i32, i32* %t48
-  %t55 = load i32, i32* %t49
-  %t56 = getelementptr inbounds i32, i32* %a, i32 %t55
-  %t57 = load i32, i32* %t56
-  %t58 = add i32 %t54, %t57
-  store i32 %t58, i32* %t48
-  br label %_30
-_30:
-  %t59 = load i32, i32* %t49
-  %t60 = add i32 %t59, 1
-  store i32 %t60, i32* %t49
-  br label %_28
-_31:
-  %t61 = icmp sgt i32 1, 2
-  br i1 %t61, label %_32, label %_33
-_32:
-  br label %_34
-_33:
-  %t81 = load i32, i32* %t48
-  ret i32 %t81
-_34:
-  %t62 = load i32, i32* %t49
-  %t63 = load i32, i32* %t47
-  %t64 = icmp slt i32 %t62, %t63
-  br i1 %t64, label %_35, label %_37
-_35:
-  br label %_36
-_36:
-  %t65 = load i32, i32* %t49
-  %t66 = add i32 %t65, 1
-  store i32 %t66, i32* %t49
-  br label %_34
-_37:
-  br label %_38
-_38:
-  br label %_39
-_39:
-  br label %_40
-_40:
-  %t67 = load i32, i32* %t49
-  %t68 = add i32 %t67, 1
-  store i32 %t68, i32* %t49
-  br label %_38
-_41:
-  br label %_42
-_42:
-  br label %_43
-_43:
-  br label %_42
-_44:
-  store i32 0, i32* %t49
-  br label %_45
-_45:
-  br label %_46
-_46:
-  br label %_47
-_47:
-  %t69 = load i32, i32* %t49
-  %t70 = add i32 %t69, 1
-  store i32 %t70, i32* %t49
-  br label %_45
-_48:
-  br label %_49
-_49:
-  %t71 = load i32, i32* %t49
-  %t72 = load i32, i32* %t47
-  %t73 = icmp slt i32 %t71, %t72
-  br i1 %t73, label %_50, label %_51
-_50:
-  br label %_49
-_51:
-  store i32 0, i32* %t49
-  br label %_52
-_52:
-  %t74 = load i32, i32* %t49
-  %t75 = load i32, i32* %t47
-  %t76 = icmp slt i32 %t74, %t75
-  br i1 %t76, label %_53, label %_54
-_53:
-  br label %_52
-_54:
-  store i32 0, i32* %t49
-  br label %_55
-_55:
-  br label %_56
-_56:
-  br label %_55
-_57:
-  store i32 0, i32* %t49
-  store i32 0, i32* %t50
-  br label %_58
-_58:
-  br label %_59
-_59:
-  br label %_58
-_60:
-  %t77 = icmp sgt i32 1, 2
-  br i1 %t77, label %_61, label %_62
-_61:
-  br label %_63
-_62:
-  br label %_63
-_63:
-  store i32 1, i32* %t49
-  %t78 = sub i32 0, 1
-  store i32 %t78, i32* %t49
-  %t79 = add i32 1, 1
-  %t80 = sub i32 0, %t79
-  store i32 %t80, i32* %t49
-  store i32 1, i32* %t49
-  br label %_33
+define dso_local void @func3(i32* %a) {
+_7:
+  %t14 = getelementptr inbounds i32, i32* %a, i32 0
+  %t15 = load i32, i32* %t14
+  call void @putint(i32 %t15)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 114)
+  call void @putch(i32 115)
+  call void @putch(i32 98)
+  call void @putch(i32 10)
+  ret void
+}
+
+define dso_local i32 @func4(i32 %a, i32 %b) {
+_8:
+  %t16 = alloca i32
+  store i32 %a, i32* %t16
+  %t17 = alloca i32
+  store i32 %b, i32* %t17
+  %t18 = load i32, i32* %t16
+  %t19 = load i32, i32* %t17
+  call void @putint(i32 %t18)
+  call void @putch(i32 32)
+  call void @putint(i32 %t19)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 114)
+  call void @putch(i32 115)
+  call void @putch(i32 98)
+  call void @putch(i32 10)
+  %t20 = load i32, i32* %t17
+  ret i32 %t20
+}
+
+define dso_local void @func5(i32* %a, i32 %b) {
+_9:
+  %t21 = alloca i32
+  store i32 %b, i32* %t21
+  %t22 = getelementptr inbounds i32, i32* %a, i32 0
+  %t23 = load i32, i32* %t22
+  %t24 = load i32, i32* %t21
+  call void @putint(i32 %t23)
+  call void @putch(i32 32)
+  call void @putint(i32 %t24)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 114)
+  call void @putch(i32 115)
+  call void @putch(i32 98)
+  call void @putch(i32 10)
+  ret void
 }
 
 define dso_local i32 @main() {
-_64:
+_10:
   call void @putch(i32 50)
   call void @putch(i32 50)
   call void @putch(i32 51)
   call void @putch(i32 55)
-  call void @putch(i32 54)
-  call void @putch(i32 50)
-  call void @putch(i32 56)
-  call void @putch(i32 54)
-  call void @putch(i32 10)
-  %t82 = alloca i32
-  store i32 0, i32* %t82
-  %t83 = alloca [2 x i32]
-  %t84 = getelementptr inbounds [2 x i32], [2 x i32]* %t83, i32 0, i32 0
-  store i32 1, i32* %t84
-  %t85 = getelementptr inbounds [2 x i32], [2 x i32]* %t83, i32 0, i32 1
-  store i32 2, i32* %t85
-  %t86 = alloca i32
-  store i32 3, i32* %t86
-  %t87 = alloca i32
-  %t88 = alloca i32
-  %t89 = alloca i32
-  %t90 = icmp ne i32 1, 0
-  br i1 %t90, label %_68, label %_67
-_65:
-  store i32 1, i32* %t87
-  br label %_66
-_66:
-  %t93 = load i32, i32* %t82
-  %t94 = mul i32 %t93, 1
-  %t95 = srem i32 %t94, 4
-  %t96 = sdiv i32 %t95, 2
-  call void @putint(i32 %t96)
-  call void @putch(i32 10)
-  %t97 = icmp sge i32 1, 2
-  br i1 %t97, label %_69, label %_70
-_67:
-  %t91 = icmp ne i32 1, 0
-  br label %_68
-_68:
-  %t92 = phi i1 [1, %_64], [%t91, %_67]
-  br i1 %t92, label %_65, label %_66
-_69:
-  %t98 = alloca i32
-  %t99 = add i32 32, 2
-  %t100 = sub i32 %t99, 1
-  %t101 = load i32, i32* @globalVar
-  %t102 = getelementptr inbounds [2 x i32], [2 x i32]* %t83, i32 0, i32 1
-  %t103 = load i32, i32* %t102
-  %t104 = srem i32 %t103, 44
-  %t105 = add i32 42, %t104
-  %t106 = mul i32 %t101, %t105
-  %t107 = add i32 %t100, %t106
-  store i32 %t107, i32* %t98
-  br label %_70
-_70:
-  %t108 = alloca i32
-  store i32 2342, i32* %t108
-  %t109 = alloca i32
-  store i32 2323, i32* %t109
-  %t110 = alloca [2 x i32]
-  %t111 = getelementptr inbounds [2 x i32], [2 x i32]* %t110, i32 0, i32 0
-  store i32 10, i32* %t111
-  %t112 = getelementptr inbounds [2 x i32], [2 x i32]* %t110, i32 0, i32 1
-  store i32 10, i32* %t112
-  %t113 = alloca i32
-  store i32 1, i32* %t113
-  %t114 = getelementptr inbounds [2 x i32], [2 x i32]* %t110, i32 0, i32 0
-  %t115 = call i32 @sum(i32* %t114, i32 2)
-  store i32 %t115, i32* %t113
-  call void @putch(i32 103)
-  call void @putch(i32 108)
-  call void @putch(i32 111)
-  call void @putch(i32 98)
-  call void @putch(i32 97)
-  call void @putch(i32 108)
-  call void @putch(i32 86)
-  call void @putch(i32 97)
-  call void @putch(i32 114)
-  call void @putch(i32 61)
-  %t116 = load i32, i32* @globalVar
-  call void @putint(i32 %t116)
-  call void @putch(i32 10)
-  call void @putch(i32 103)
-  call void @putch(i32 108)
-  call void @putch(i32 111)
-  call void @putch(i32 98)
-  call void @putch(i32 97)
-  call void @putch(i32 108)
-  call void @putch(i32 86)
-  call void @putch(i32 97)
-  call void @putch(i32 114)
-  call void @putch(i32 61)
-  %t117 = load i32, i32* @globalVar1
-  call void @putint(i32 %t117)
-  call void @putch(i32 10)
-  %t118 = alloca i32
-  store i32 1, i32* %t118
-  %t119 = load i32, i32* %t108
-  %t120 = load i32, i32* %t109
-  %t121 = getelementptr inbounds [2 x i32], [2 x i32]* %t110, i32 0, i32 0
-  %t122 = call i32 @caculateFunc(i32 %t119, i32 %t120, i32* %t121)
-  store i32 %t122, i32* %t118
-  call void @putch(i32 99)
-  call void @putch(i32 97)
-  call void @putch(i32 108)
-  call void @putch(i32 99)
-  call void @putch(i32 117)
-  call void @putch(i32 108)
-  call void @putch(i32 97)
-  call void @putch(i32 116)
-  call void @putch(i32 101)
-  call void @putch(i32 70)
-  call void @putch(i32 117)
-  call void @putch(i32 110)
-  call void @putch(i32 99)
-  call void @putch(i32 40)
-  call void @putch(i32 41)
-  call void @putch(i32 61)
-  %t123 = load i32, i32* %t118
-  call void @putint(i32 %t123)
-  call void @putch(i32 10)
-  call void @declareFunc()
-  call void @putch(i32 100)
-  call void @putch(i32 101)
-  call void @putch(i32 99)
-  call void @putch(i32 108)
-  call void @putch(i32 97)
-  call void @putch(i32 114)
-  call void @putch(i32 101)
-  call void @putch(i32 70)
-  call void @putch(i32 117)
-  call void @putch(i32 110)
-  call void @putch(i32 99)
-  call void @putch(i32 40)
-  call void @putch(i32 41)
-  call void @putch(i32 61)
-  call void @putint(i32 0)
-  call void @putch(i32 10)
+  call void @putch(i32 51)
+  call void @putch(i32 51)
+  call void @putch(i32 52)
   call void @putch(i32 48)
   call void @putch(i32 10)
+  %t25 = alloca i32
+  %t26 = icmp ne i32 0, 0
+  br i1 %t26, label %_13, label %_15
+_11:
+  br label %_12
+_12:
+  %t32 = load i32, i32* @g_global_var
+  call void @putint(i32 %t32)
+  %t33 = alloca i32
+  %t34 = icmp ne i32 1, 0
+  br i1 %t34, label %_20, label %_18
+_13:
+  %t27 = call i32 @func()
+  %t28 = icmp ne i32 %t27, 0
+  %t29 = zext i1 %t28 to i32
+  store i32 %t29, i32* %t25
+  br label %_14
+_14:
+  %t30 = load i32, i32* %t25
+  %t31 = icmp ne i32 %t30, 0
+  br i1 %t31, label %_11, label %_12
+_15:
+  store i32 0, i32* %t25
+  br label %_14
+_16:
+  br label %_17
+_17:
+  %t40 = load i32, i32* @g_global_var
+  call void @putint(i32 %t40)
+  store i32 1, i32* @g_i
+  %t41 = load i32, i32* @g_i
+  %t42 = icmp eq i32 %t41, 1
+  br i1 %t42, label %_21, label %_22
+_18:
+  %t35 = call i32 @func()
+  %t36 = icmp ne i32 %t35, 0
+  %t37 = zext i1 %t36 to i32
+  store i32 %t37, i32* %t33
+  br label %_19
+_19:
+  %t38 = load i32, i32* %t33
+  %t39 = icmp ne i32 %t38, 0
+  br i1 %t39, label %_16, label %_17
+_20:
+  store i32 1, i32* %t33
+  br label %_19
+_21:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
   call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 100)
+  call void @putch(i32 105)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
   call void @putch(i32 10)
-  call void @putch(i32 50)
+  br label %_22
+_22:
+  %t43 = load i32, i32* @g_i
+  %t44 = icmp sge i32 %t43, 1
+  br i1 %t44, label %_23, label %_24
+_23:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
+  call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 100)
+  call void @putch(i32 105)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
   call void @putch(i32 10)
+  br label %_25
+_24:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
+  call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 101)
+  call void @putch(i32 108)
   call void @putch(i32 115)
-  call void @putch(i32 117)
-  call void @putch(i32 109)
+  call void @putch(i32 101)
+  call void @putch(i32 10)
+  br label %_25
+_25:
+  %t45 = load i32, i32* @g_i
+  %t46 = icmp sle i32 %t45, 1
+  br i1 %t46, label %_26, label %_27
+_26:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
   call void @putch(i32 49)
-  call void @putch(i32 61)
-  %t124 = load i32, i32* %t113
-  call void @putint(i32 %t124)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 100)
+  call void @putch(i32 105)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 10)
+  br label %_28
+_27:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
+  call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 101)
+  call void @putch(i32 108)
+  call void @putch(i32 115)
+  call void @putch(i32 101)
+  call void @putch(i32 10)
+  br label %_28
+_28:
+  %t47 = load i32, i32* @g_i
+  %t48 = icmp ne i32 %t47, 1
+  br i1 %t48, label %_29, label %_30
+_29:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
+  call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 100)
+  call void @putch(i32 105)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 10)
+  br label %_31
+_30:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
+  call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 101)
+  call void @putch(i32 108)
+  call void @putch(i32 115)
+  call void @putch(i32 101)
+  call void @putch(i32 10)
+  br label %_31
+_31:
+  %t49 = load i32, i32* @g_i
+  %t50 = icmp slt i32 %t49, 1
+  br i1 %t50, label %_32, label %_33
+_32:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
+  call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 100)
+  call void @putch(i32 105)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 10)
+  br label %_34
+_33:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
+  call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 101)
+  call void @putch(i32 108)
+  call void @putch(i32 115)
+  call void @putch(i32 101)
+  call void @putch(i32 10)
+  br label %_34
+_34:
+  %t51 = load i32, i32* @g_i
+  %t52 = icmp sgt i32 %t51, 1
+  br i1 %t52, label %_35, label %_36
+_35:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
+  call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 100)
+  call void @putch(i32 105)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 10)
+  br label %_37
+_36:
+  call void @putch(i32 105)
+  call void @putch(i32 102)
+  call void @putch(i32 32)
+  call void @putch(i32 49)
+  call void @putch(i32 32)
+  call void @putch(i32 101)
+  call void @putch(i32 108)
+  call void @putch(i32 115)
+  call void @putch(i32 101)
+  call void @putch(i32 10)
+  br label %_37
+_37:
+  %t53 = load i32, i32* @g_i
+  %t54 = load i32, i32* @g_i
+  %t55 = icmp eq i32 %t54, 0
+  %t56 = zext i1 %t55 to i32
+  %t57 = icmp ne i32 %t53, %t56
+  br i1 %t57, label %_38, label %_39
+_38:
+  call void @putch(i32 89)
+  call void @putch(i32 111)
+  call void @putch(i32 117)
+  call void @putch(i32 32)
+  call void @putch(i32 115)
+  call void @putch(i32 104)
+  call void @putch(i32 111)
+  call void @putch(i32 117)
+  call void @putch(i32 108)
+  call void @putch(i32 100)
+  call void @putch(i32 32)
+  call void @putch(i32 115)
+  call void @putch(i32 101)
+  call void @putch(i32 101)
+  call void @putch(i32 32)
+  call void @putch(i32 116)
+  call void @putch(i32 104)
+  call void @putch(i32 105)
+  call void @putch(i32 115)
+  call void @putch(i32 10)
+  br label %_39
+_39:
+  store i32 0, i32* @g_i
+  br label %_40
+_40:
+  %t58 = load i32, i32* @g_i
+  %t59 = icmp slt i32 %t58, 10
+  br i1 %t59, label %_41, label %_43
+_41:
+  %t60 = load i32, i32* @g_i
+  %t61 = icmp eq i32 %t60, 0
+  br i1 %t61, label %_44, label %_45
+_42:
+  %t65 = load i32, i32* @g_i
+  %t66 = add i32 %t65, 1
+  store i32 %t66, i32* @g_i
+  br label %_40
+_43:
+  %t67 = alloca i32
+  store i32 1, i32* %t67
+  %t68 = alloca i32
+  store i32 114, i32* %t68
+  %t69 = alloca i32
+  store i32 1, i32* %t69
+  %t70 = alloca i32
+  store i32 2, i32* %t70
+  %t71 = alloca i32
+  store i32 114, i32* %t71
+  %t72 = alloca i32
+  store i32 514, i32* %t72
+  %t73 = alloca [5 x i32]
+  %t74 = getelementptr inbounds [5 x i32], [5 x i32]* %t73, i32 0, i32 0
+  store i32 1, i32* %t74
+  %t75 = getelementptr inbounds [5 x i32], [5 x i32]* %t73, i32 0, i32 1
+  store i32 2, i32* %t75
+  %t76 = getelementptr inbounds [5 x i32], [5 x i32]* %t73, i32 0, i32 2
+  store i32 3, i32* %t76
+  %t77 = getelementptr inbounds [5 x i32], [5 x i32]* %t73, i32 0, i32 3
+  store i32 4, i32* %t77
+  %t78 = getelementptr inbounds [5 x i32], [5 x i32]* %t73, i32 0, i32 4
+  store i32 5, i32* %t78
+  %t79 = alloca [5 x i32]
+  %t80 = getelementptr inbounds [5 x i32], [5 x i32]* %t79, i32 0, i32 0
+  store i32 6, i32* %t80
+  %t81 = getelementptr inbounds [5 x i32], [5 x i32]* %t79, i32 0, i32 1
+  store i32 7, i32* %t81
+  %t82 = getelementptr inbounds [5 x i32], [5 x i32]* %t79, i32 0, i32 2
+  store i32 8, i32* %t82
+  %t83 = getelementptr inbounds [5 x i32], [5 x i32]* %t79, i32 0, i32 3
+  store i32 9, i32* %t83
+  %t84 = alloca [6 x i32]
+  %t85 = getelementptr inbounds [6 x i32], [6 x i32]* %t84, i32 0, i32 0
+  store i32 10, i32* %t85
+  %t86 = getelementptr inbounds [6 x i32], [6 x i32]* %t84, i32 0, i32 1
+  store i32 11, i32* %t86
+  %t87 = getelementptr inbounds [6 x i32], [6 x i32]* %t84, i32 0, i32 2
+  store i32 12, i32* %t87
+  %t88 = getelementptr inbounds [5 x i32], [5 x i32]* %t73, i32 0, i32 0
+  %t89 = load i32, i32* %t88
+  %t90 = getelementptr inbounds [5 x i32], [5 x i32]* %t79, i32 0, i32 2
+  %t91 = load i32, i32* %t90
+  %t92 = getelementptr inbounds [6 x i32], [6 x i32]* %t84, i32 0, i32 1
+  %t93 = load i32, i32* %t92
+  call void @putch(i32 116)
+  call void @putch(i32 101)
+  call void @putch(i32 115)
+  call void @putch(i32 116)
+  call void @putch(i32 32)
+  call void @putch(i32 102)
+  call void @putch(i32 111)
+  call void @putch(i32 116)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 115)
+  call void @putch(i32 116)
+  call void @putch(i32 32)
+  call void @putch(i32 97)
+  call void @putch(i32 114)
+  call void @putch(i32 114)
+  call void @putch(i32 97)
+  call void @putch(i32 121)
+  call void @putch(i32 58)
+  call void @putint(i32 %t89)
+  call void @putch(i32 32)
+  call void @putint(i32 %t91)
+  call void @putch(i32 32)
+  call void @putint(i32 %t93)
+  call void @putch(i32 10)
+  %t94 = alloca i32
+  %t95 = alloca i32
+  %t96 = alloca i32
+  %t97 = alloca i32
+  %t98 = alloca i32
+  %t99 = alloca i32
+  %t100 = alloca [5 x i32]
+  %t101 = getelementptr inbounds [5 x i32], [5 x i32]* %t100, i32 0, i32 0
+  store i32 1, i32* %t101
+  %t102 = getelementptr inbounds [5 x i32], [5 x i32]* %t100, i32 0, i32 1
+  store i32 2, i32* %t102
+  %t103 = getelementptr inbounds [5 x i32], [5 x i32]* %t100, i32 0, i32 2
+  store i32 3, i32* %t103
+  %t104 = getelementptr inbounds [5 x i32], [5 x i32]* %t100, i32 0, i32 3
+  store i32 4, i32* %t104
+  %t105 = getelementptr inbounds [5 x i32], [5 x i32]* %t100, i32 0, i32 4
+  store i32 5, i32* %t105
+  %t106 = alloca [5 x i32]
+  %t107 = alloca [5 x i32]
+  %t108 = getelementptr inbounds [5 x i32], [5 x i32]* %t107, i32 0, i32 0
+  store i32 1, i32* %t108
+  %t109 = getelementptr inbounds [5 x i32], [5 x i32]* %t107, i32 0, i32 1
+  store i32 2, i32* %t109
+  %t110 = getelementptr inbounds [5 x i32], [5 x i32]* %t107, i32 0, i32 2
+  store i32 3, i32* %t110
+  %t111 = getelementptr inbounds [5 x i32], [5 x i32]* %t107, i32 0, i32 3
+  store i32 4, i32* %t111
+  %t112 = alloca [6 x i32]
+  %t113 = getelementptr inbounds [6 x i32], [6 x i32]* %t112, i32 0, i32 0
+  store i32 5, i32* %t113
+  %t114 = getelementptr inbounds [6 x i32], [6 x i32]* %t112, i32 0, i32 1
+  store i32 6, i32* %t114
+  %t115 = getelementptr inbounds [6 x i32], [6 x i32]* %t112, i32 0, i32 2
+  store i32 7, i32* %t115
+  %t116 = getelementptr inbounds [6 x i32], [6 x i32]* %t112, i32 0, i32 3
+  store i32 8, i32* %t116
+  %t117 = getelementptr inbounds [6 x i32], [6 x i32]* %t112, i32 0, i32 4
+  store i32 9, i32* %t117
+  store i32 1, i32* %t94
+  %t118 = sub i32 0, 1
+  store i32 %t118, i32* %t94
+  %t119 = add i32 1, 1
+  store i32 %t119, i32* %t94
+  %t120 = mul i32 1, 1
+  store i32 %t120, i32* %t94
+  %t121 = sdiv i32 1, 1
+  store i32 %t121, i32* %t94
+  %t122 = sub i32 1, 1
+  store i32 %t122, i32* %t94
+  %t123 = srem i32 1, 2
+  store i32 %t123, i32* %t94
+  %t124 = add i32 1, 1
+  %t125 = load i32, i32* %t94
+  %t126 = mul i32 %t124, %t125
+  store i32 %t126, i32* %t94
+  %t127 = add i32 114, 3
+  %t128 = add i32 1, 1
+  %t129 = sdiv i32 %t127, %t128
+  store i32 %t129, i32* %t94
+  %t130 = load i32, i32* %t94
+  %t131 = mul i32 %t130, 2
+  store i32 %t131, i32* %t94
+  %t132 = load i32, i32* %t94
+  %t133 = add i32 %t132, 2
+  store i32 %t133, i32* %t94
+  %t134 = load i32, i32* %t94
+  %t135 = sdiv i32 %t134, 1
+  store i32 %t135, i32* %t94
+  %t136 = load i32, i32* %t94
+  %t137 = srem i32 %t136, 2
+  store i32 %t137, i32* %t94
+  %t138 = load i32, i32* %t94
+  %t139 = sub i32 %t138, 2
+  store i32 %t139, i32* %t94
+  call void @func1()
+  %t140 = load i32, i32* %t67
+  %t141 = call i32 @func2(i32 %t140)
+  %t142 = getelementptr inbounds [5 x i32], [5 x i32]* %t100, i32 0, i32 0
+  call void @func3(i32* %t142)
+  %t143 = load i32, i32* %t67
+  %t144 = load i32, i32* %t68
+  %t145 = call i32 @func4(i32 %t143, i32 %t144)
+  %t146 = getelementptr inbounds [5 x i32], [5 x i32]* %t107, i32 0, i32 0
+  %t147 = load i32, i32* %t67
+  call void @func5(i32* %t146, i32 %t147)
+  %t148 = load i32, i32* %t67
+  %t149 = icmp eq i32 %t148, 1
+  %t150 = alloca i32
+  br i1 %t149, label %_53, label %_51
+_44:
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 110)
+  call void @putch(i32 117)
+  call void @putch(i32 101)
+  call void @putch(i32 32)
+  call void @putch(i32 116)
+  call void @putch(i32 101)
+  call void @putch(i32 115)
+  call void @putch(i32 116)
+  call void @putch(i32 10)
+  br label %_42
+_45:
+  %t62 = load i32, i32* @g_i
+  call void @putch(i32 84)
+  call void @putch(i32 104)
+  call void @putch(i32 101)
+  call void @putch(i32 32)
+  call void @putint(i32 %t62)
+  call void @putch(i32 32)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 109)
+  call void @putch(i32 101)
+  call void @putch(i32 32)
+  call void @putch(i32 114)
+  call void @putch(i32 117)
+  call void @putch(i32 110)
+  call void @putch(i32 32)
+  call void @putch(i32 102)
+  call void @putch(i32 111)
+  call void @putch(i32 114)
+  call void @putch(i32 10)
+  %t63 = load i32, i32* @g_i
+  %t64 = icmp eq i32 %t63, 9
+  br i1 %t64, label %_46, label %_47
+_46:
+  call void @putch(i32 98)
+  call void @putch(i32 114)
+  call void @putch(i32 101)
+  call void @putch(i32 97)
+  call void @putch(i32 107)
+  call void @putch(i32 32)
+  call void @putch(i32 116)
+  call void @putch(i32 101)
+  call void @putch(i32 115)
+  call void @putch(i32 116)
+  call void @putch(i32 10)
+  br label %_43
+_47:
+  br label %_42
+_48:
+  call void @putch(i32 83)
+  call void @putch(i32 104)
+  call void @putch(i32 111)
+  call void @putch(i32 117)
+  call void @putch(i32 108)
+  call void @putch(i32 100)
+  call void @putch(i32 32)
+  call void @putch(i32 98)
+  call void @putch(i32 101)
+  call void @putch(i32 32)
+  call void @putch(i32 115)
+  call void @putch(i32 101)
+  call void @putch(i32 101)
+  call void @putch(i32 110)
+  call void @putch(i32 32)
+  call void @putch(i32 105)
+  call void @putch(i32 110)
+  call void @putch(i32 32)
+  call void @putch(i32 124)
+  call void @putch(i32 124)
+  call void @putch(i32 10)
+  br label %_50
+_49:
+  br label %_50
+_50:
+  %t156 = load i32, i32* %t67
+  %t157 = icmp eq i32 %t156, 1
+  %t158 = alloca i32
+  br i1 %t157, label %_56, label %_58
+_51:
+  %t151 = load i32, i32* %t68
+  %t152 = icmp eq i32 %t151, 2
+  %t153 = zext i1 %t152 to i32
+  store i32 %t153, i32* %t150
+  br label %_52
+_52:
+  %t154 = load i32, i32* %t150
+  %t155 = icmp ne i32 %t154, 0
+  br i1 %t155, label %_48, label %_49
+_53:
+  store i32 1, i32* %t150
+  br label %_52
+_54:
+  call void @putch(i32 83)
+  call void @putch(i32 104)
+  call void @putch(i32 111)
+  call void @putch(i32 117)
+  call void @putch(i32 108)
+  call void @putch(i32 100)
+  call void @putch(i32 110)
+  call void @putch(i32 39)
+  call void @putch(i32 116)
+  call void @putch(i32 32)
+  call void @putch(i32 98)
+  call void @putch(i32 101)
+  call void @putch(i32 32)
+  call void @putch(i32 115)
+  call void @putch(i32 101)
+  call void @putch(i32 101)
+  call void @putch(i32 110)
+  call void @putch(i32 32)
+  call void @putch(i32 105)
+  call void @putch(i32 110)
+  call void @putch(i32 32)
+  call void @putch(i32 38)
+  call void @putch(i32 38)
+  call void @putch(i32 10)
+  br label %_55
+_55:
+  store i32 0, i32* @g_i
+  br label %_59
+_56:
+  %t159 = load i32, i32* %t68
+  %t160 = icmp eq i32 %t159, 2
+  %t161 = zext i1 %t160 to i32
+  store i32 %t161, i32* %t158
+  br label %_57
+_57:
+  %t162 = load i32, i32* %t158
+  %t163 = icmp ne i32 %t162, 0
+  br i1 %t163, label %_54, label %_55
+_58:
+  store i32 0, i32* %t158
+  br label %_57
+_59:
+  %t164 = load i32, i32* @g_i
+  %t165 = icmp sle i32 %t164, 10
+  br i1 %t165, label %_60, label %_62
+_60:
+  %t166 = load i32, i32* @g_i
+  %t167 = icmp eq i32 %t166, 1
+  %t168 = alloca i32
+  br i1 %t167, label %_67, label %_65
+_61:
+  %t185 = load i32, i32* @g_i
+  %t186 = add i32 %t185, 1
+  store i32 %t186, i32* @g_i
+  br label %_59
+_62:
+  br label %_73
+_63:
+  %t180 = load i32, i32* @g_i
+  call void @putch(i32 83)
+  call void @putch(i32 104)
+  call void @putch(i32 111)
+  call void @putch(i32 117)
+  call void @putch(i32 108)
+  call void @putch(i32 100)
+  call void @putch(i32 32)
+  call void @putch(i32 105)
+  call void @putch(i32 110)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 110)
+  call void @putch(i32 117)
+  call void @putch(i32 101)
+  call void @putch(i32 32)
+  call void @putch(i32 115)
+  call void @putch(i32 116)
+  call void @putch(i32 101)
+  call void @putch(i32 112)
+  call void @putch(i32 40)
+  call void @putint(i32 %t180)
+  call void @putch(i32 41)
+  call void @putch(i32 32)
+  call void @putch(i32 119)
+  call void @putch(i32 105)
+  call void @putch(i32 116)
+  call void @putch(i32 104)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 109)
+  call void @putch(i32 112)
+  call void @putch(i32 108)
+  call void @putch(i32 101)
+  call void @putch(i32 120)
+  call void @putch(i32 32)
+  call void @putch(i32 99)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 100)
+  call void @putch(i32 105)
+  call void @putch(i32 116)
+  call void @putch(i32 105)
+  call void @putch(i32 111)
+  call void @putch(i32 110)
+  call void @putch(i32 10)
+  br label %_61
+_64:
+  %t181 = load i32, i32* @g_i
+  %t182 = sub i32 0, 2
+  %t183 = icmp ne i32 %t181, %t182
+  br i1 %t183, label %_71, label %_72
+_65:
+  %t169 = load i32, i32* %t67
+  %t170 = icmp eq i32 %t169, 1
+  %t171 = alloca i32
+  br i1 %t170, label %_68, label %_70
+_66:
+  %t178 = load i32, i32* %t168
+  %t179 = icmp ne i32 %t178, 0
+  br i1 %t179, label %_63, label %_64
+_67:
+  store i32 1, i32* %t168
+  br label %_66
+_68:
+  %t172 = load i32, i32* %t68
+  %t173 = icmp eq i32 %t172, 2
+  %t174 = zext i1 %t173 to i32
+  store i32 %t174, i32* %t171
+  br label %_69
+_69:
+  %t175 = load i32, i32* %t171
+  %t176 = icmp ne i32 %t175, 0
+  %t177 = zext i1 %t176 to i32
+  store i32 %t177, i32* %t168
+  br label %_66
+_70:
+  store i32 0, i32* %t171
+  br label %_69
+_71:
+  %t184 = load i32, i32* @g_i
+  call void @putint(i32 %t184)
+  call void @putch(i32 32)
+  call void @putch(i32 83)
+  call void @putch(i32 104)
+  call void @putch(i32 111)
+  call void @putch(i32 117)
+  call void @putch(i32 108)
+  call void @putch(i32 100)
+  call void @putch(i32 110)
+  call void @putch(i32 39)
+  call void @putch(i32 116)
+  call void @putch(i32 32)
+  call void @putch(i32 98)
+  call void @putch(i32 101)
+  call void @putch(i32 32)
+  call void @putch(i32 115)
+  call void @putch(i32 101)
+  call void @putch(i32 101)
+  call void @putch(i32 110)
+  call void @putch(i32 10)
+  br label %_61
+_72:
+  br label %_62
+_73:
+  %t187 = load i32, i32* %t67
+  %t188 = icmp eq i32 %t187, 1
+  br i1 %t188, label %_74, label %_76
+_74:
+  br label %_76
+_75:
+  store i32 0, i32* %t94
+  br label %_73
+_76:
+  store i32 0, i32* @g_i
+  br label %_77
+_77:
+  br label %_78
+_78:
+  br label %_80
+_79:
+  %t189 = load i32, i32* @g_i
+  %t190 = add i32 %t189, 1
+  store i32 %t190, i32* @g_i
+  br label %_77
+_80:
+  store i32 0, i32* @g_i
+  br label %_81
+_81:
+  %t191 = load i32, i32* @g_i
+  %t192 = icmp slt i32 %t191, 10
+  br i1 %t192, label %_82, label %_83
+_82:
+  br label %_83
+_83:
+  store i32 0, i32* @g_i
+  br label %_84
+_84:
+  br label %_85
+_85:
+  br label %_86
+_86:
+  br label %_87
+_87:
+  %t193 = load i32, i32* %t67
+  %t194 = icmp eq i32 %t193, 1
+  br i1 %t194, label %_88, label %_89
+_88:
+  br label %_89
+_89:
+  br label %_90
+_90:
+  br label %_91
+_91:
+  br label %_93
+_92:
+  store i32 0, i32* %t94
+  br label %_90
+_93:
+  br label %_94
+_94:
+  br label %_95
+_95:
+  br label %_96
+_96:
+  %t195 = call i32 @getint()
+  store i32 %t195, i32* %t94
+  %t196 = load i32, i32* %t94
+  call void @putint(i32 %t196)
+  call void @putch(i32 10)
+  %t197 = call i32 @getint()
+  store i32 %t197, i32* %t95
+  %t198 = load i32, i32* %t95
+  call void @putint(i32 %t198)
+  %t199 = call i32 @getint()
+  store i32 %t199, i32* %t95
+  %t200 = load i32, i32* %t95
+  call void @putint(i32 %t200)
   call void @putch(i32 10)
   ret i32 0
 }
